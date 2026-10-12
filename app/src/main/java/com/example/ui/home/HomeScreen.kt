@@ -52,6 +52,7 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val playerState by playerManager.playerState.collectAsStateWithLifecycle()
+    val announcementBanner by com.example.VybeApp.instance.updateManager.announcementBanner.collectAsStateWithLifecycle()
 
       Box(
     modifier = modifier
@@ -126,8 +127,7 @@ fun HomeScreen(
                     Text("Retry", fontWeight = FontWeight.Bold)
                 }
             }
-            val announcementBanner by com.example.VybeApp.instance.updateManager.announcementBanner.collectAsStateWithLifecycle()
-
+        } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 120.dp) // Room for floating bar & mini player
