@@ -17,7 +17,7 @@ interface MusicRepository {
     suspend fun getPlaylistDetails(playlistId: String): Result<Playlist>
     suspend fun getArtistTopSongs(artistId: String): Result<List<Song>>
     suspend fun getSongById(songId: String): Result<Song>
-    suspend fun getRadioQueue(songId: String, limit: Int = 10): Result<List<Song>>
+    suspend fun getRadioQueue(songId: String, limit: Int = 10, excludeIds: List<String> = emptyList()): Result<List<Song>>
     
     // Local persistence & user behavior
     fun getFavorites(): Flow<List<Song>>
