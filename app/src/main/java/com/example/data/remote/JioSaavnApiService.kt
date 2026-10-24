@@ -73,6 +73,8 @@ interface JioSaavnApiService {
         @Url url: String,
         @Query("seeds") seeds: String,
         @Query("exclude") exclude: String,
-        @Query("limit") limit: Int = 10
+        @Query("limit") limit: Int = 10,
+        @Query("skipped") skipped: String = "",
+        @Query("liked") liked: String = ""
     ): ApiResponse<List<ApiSong>>
 }
