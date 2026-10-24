@@ -167,7 +167,7 @@ class SearchViewModel(
     )
 
     viewModelScope.launch {
-        repository.getRadioQueue(song.id, limit = 20).onSuccess { radioSongs ->
+        repository.getRadioQueue(song.id, limit = 10).onSuccess { radioSongs ->
 
             // IDs of songs already visible in search results
             val searchResultIds = fallbackPlaylist
