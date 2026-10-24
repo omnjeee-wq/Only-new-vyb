@@ -268,16 +268,45 @@ class MusicRepositoryImpl(
         }
     }
 
-    private val queueUrl = "https://vyberadio.vyoma-apps.workers.dev/queue"
+    private val queueUrl = "https://sdk.omnjeee.workers.dev/queue"
 
-    override suspend fun getRadioQueue(songId: String, limit: Int): Result<List<Song>> = withContext(Dispatchers.IO) {
+    override suspend fun getRadioQueue(
+        songId: String,
+        limit: Int,
+        excludeIds: List<String>
+    ): Result<List<Song>> = withContext(Dispatchers.IO) {
         try {
-            val recentIds = songDao.getRecentHistory(50).map { it.songId }
-            val seeds = (listOf(songId) + recentIds).distinct().take(3).joinToString(",")
-            val exclude = recentIds.reversed().joinToString(",")
+            val history = songDao.getRecentHistory(60)
+
+            // Taste signals from listening history
+            val likedIds = history.filter { it.isLiked }.map { it.songId }
+            val goodIds = history
+                .filter { it.completedCount > 0 && it.completedCount >= it.skipCount }
+                .map { it.songId }
+            val skippedIds = history
+                .filter { it.skipCount > 0 && it.skipCount > it.completedCount }
+                .map { it.songId }
+
+            // Seeds: current song first, then liked / completed songs (not just "recent")
+            val seeds = (listOf(songId) + likedIds.take(2) + goodIds.take(2))
+                .distinct()
+                .take(4)
+                .joinToString(",")
+
+            // Exclude: recent history + everything already in the queue
+            val exclude = (history.take(50).map { it.songId } + excludeIds.takeLast(40) + songId)
+                .distinct()
+                .joinToString(",")
 
             val quality = songDao.getPreference("pref_streaming_quality") ?: "High (320 kbps)"
-            val response = apiService.getQueue(url = queueUrl, seeds = seeds, exclude = exclude, limit = limit)
+            val response = apiService.getQueue(
+                url = queueUrl,
+                seeds = seeds,
+                exclude = exclude,
+                limit = limit,
+                skipped = skippedIds.take(10).joinToString(","),
+                liked = likedIds.take(5).joinToString(",")
+            )
             val songs = response.data?.map { MusicUtils.toDomainSong(it, preferredQuality = quality) } ?: emptyList()
 
             if (songs.isNotEmpty()) {
