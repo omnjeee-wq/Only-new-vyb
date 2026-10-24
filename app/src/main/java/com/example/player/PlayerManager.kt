@@ -68,12 +68,16 @@ class PlayerManager private constructor(
         if (state.isSmartShuffleEnabled) return
         val current = state.currentSong ?: return
         val remaining = state.queue.size - state.currentIndex - 1
-        if (remaining > 2) return
+        if (remaining > 4) return
 
         isRefillingQueue = true
         scope.launch {
             try {
-                repository.getRadioQueue(songId = current.id, limit = 15).onSuccess { songs ->
+                repository.getRadioQueue(
+                    songId = current.id,
+                    limit = 12,
+                    excludeIds = _playerState.value.queue.map { it.id }
+                ).onSuccess { songs ->
                     val existing = _playerState.value.queue.map { it.id }.toSet()
                     val fresh = songs.filter { it.id !in existing }.distinctBy { it.id }.take(10)
                     if (fresh.isNotEmpty()) {
