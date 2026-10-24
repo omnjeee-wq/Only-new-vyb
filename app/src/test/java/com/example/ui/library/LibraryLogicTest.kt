@@ -122,7 +122,7 @@ class LibraryLogicTest {
         override suspend fun getPlaylistDetails(playlistId: String): Result<Playlist> = Result.failure(Exception())
         override suspend fun getArtistTopSongs(artistId: String): Result<List<Song>> = Result.success(emptyList())
         override suspend fun getSongById(songId: String): Result<Song> = Result.failure(Exception())
-        override suspend fun getRadioQueue(songId: String, limit: Int): Result<List<Song>> = Result.success(emptyList())
+        override suspend fun getRadioQueue(songId: String, limit: Int, excludeIds: List<String>): Result<List<Song>> = Result.success(emptyList())
         override suspend fun recordListeningEvent(song: Song, event: ListeningEventType) {}
         override suspend fun getRecentPlayedSongs(limit: Int): List<Song> = emptyList()
         override suspend fun getQualifyingPlayCount(): Int = 0
