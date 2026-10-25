@@ -31,6 +31,7 @@ data class HomeUiState(
     val heroSong: Song? = null,
     val recommendations: List<Song> = emptyList(),
     val candidatePool: List<Song> = emptyList(),
+    val poolIsPersonal: Boolean = false,
     val sections: List<HomeSection> = emptyList(),
     val selectedCollection: CollectionDetailState? = null,
     val errorMessage: String? = null
@@ -54,13 +55,28 @@ class HomeViewModel(
     private fun observeRecsRefreshSignal() {
         viewModelScope.launch {
             playerManager.recsRefreshSignal.collect {
-                viewModelScope.launch(Dispatchers.Default) {
-                    val candidatePool = _uiState.value.candidatePool
-                    if (candidatePool.isNotEmpty()) {
-                        val newRecs = recommendationEngine.generateRecommendations(candidatePool)
-                        _uiState.update { it.copy(recommendations = newRecs) }
-                    }
-                }
+                refreshRecommendations()
+            }
+        }
+    }
+
+    /** Har 3 qualifying plays pe: taste profile se fresh pool, hero same rehta hai. */
+    private fun refreshRecommendations() {
+        viewModelScope.launch(Dispatchers.Default) {
+            val personal = recommendationEngine.fetchPersonalPool()
+            val state = _uiState.value
+            val usePersonal = personal.size >= 6
+            val pool = if (usePersonal) personal else state.candidatePool
+            if (pool.isEmpty()) return@launch
+
+            val recs = recommendationEngine.generateRecommendations(
+                candidatePool = pool,
+                personalized = usePersonal,
+                excludeIds = setOfNotNull(state.heroSong?.id)
+            )
+            if (usePersonal) recommendationEngine.rememberShown(recs)
+            _uiState.update {
+                it.copy(recommendations = recs, candidatePool = pool, poolIsPersonal = usePersonal)
             }
         }
     }
@@ -79,20 +95,30 @@ class HomeViewModel(
 
             val candidatesDeferred = async { repository.getRecommendationCandidates() }
             val sectionsDeferred = async { repository.getHomeSections() }
+            val personalDeferred = async { recommendationEngine.fetchPersonalPool() }
 
             val candidates = candidatesDeferred.await()
             val sectionsResult = sectionsDeferred.await()
+            val personal = personalDeferred.await()
+            val usePersonal = personal.size >= 6
 
-            if (sectionsResult.isSuccess || candidates.isNotEmpty()) {
+            if (sectionsResult.isSuccess || candidates.isNotEmpty() || usePersonal) {
                 val sections = sectionsResult.getOrNull() ?: emptyList()
-                val candidatePool = if (candidates.isNotEmpty()) {
-                    candidates
-                } else {
-                    sections.flatMap { it.songs }.distinctBy { it.id }
+                val candidatePool = when {
+                    usePersonal -> personal
+                    candidates.isNotEmpty() -> candidates
+                    else -> sections.flatMap { it.songs }.distinctBy { it.id }
                 }
 
                 val hero = recommendationEngine.selectHeroTrack(candidatePool)
-                val recommendations = recommendationEngine.generateRecommendations(candidatePool)
+                val recommendations = recommendationEngine.generateRecommendations(
+                    candidatePool = candidatePool,
+                    personalized = usePersonal,
+                    excludeIds = setOfNotNull(hero?.id)
+                )
+                if (usePersonal) {
+                    recommendationEngine.rememberShown(listOfNotNull(hero) + recommendations)
+                }
 
                 _uiState.update {
                     it.copy(
@@ -100,6 +126,7 @@ class HomeViewModel(
                         heroSong = hero,
                         recommendations = recommendations,
                         candidatePool = candidatePool,
+                        poolIsPersonal = usePersonal,
                         sections = sections
                     )
                 }
@@ -114,15 +141,31 @@ class HomeViewModel(
         }
     }
 
+    /** Har 5 qualifying plays pe: taste profile se naya hero + fresh recommendations. */
     private fun refreshRecommendationsAndHero() {
         viewModelScope.launch(Dispatchers.Default) {
-            val candidatePool = _uiState.value.candidatePool
-            if (candidatePool.isNotEmpty()) {
-                val newHero = recommendationEngine.selectHeroTrack(candidatePool)
-                val newRecs = recommendationEngine.generateRecommendations(candidatePool)
-                _uiState.update {
-                    it.copy(heroSong = newHero, recommendations = newRecs)
-                }
+            val personal = recommendationEngine.fetchPersonalPool()
+            val state = _uiState.value
+            val usePersonal = personal.size >= 6
+            val pool = if (usePersonal) personal else state.candidatePool
+            if (pool.isEmpty()) return@launch
+
+            val newHero = recommendationEngine.selectHeroTrack(pool)
+            val newRecs = recommendationEngine.generateRecommendations(
+                candidatePool = pool,
+                personalized = usePersonal,
+                excludeIds = setOfNotNull(newHero?.id)
+            )
+            if (usePersonal) {
+                recommendationEngine.rememberShown(listOfNotNull(newHero) + newRecs)
+            }
+            _uiState.update {
+                it.copy(
+                    heroSong = newHero,
+                    recommendations = newRecs,
+                    candidatePool = pool,
+                    poolIsPersonal = usePersonal
+                )
             }
         }
     }
