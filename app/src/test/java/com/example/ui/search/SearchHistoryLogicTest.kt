@@ -68,6 +68,7 @@ class SearchHistoryLogicTest {
         override suspend fun getArtistTopSongs(artistId: String): Result<List<Song>> = Result.success(emptyList())
         override suspend fun getSongById(songId: String): Result<Song> = Result.failure(Exception())
         override suspend fun getRadioQueue(songId: String, limit: Int, excludeIds: List<String>): Result<List<Song>> = Result.success(emptyList())
+        override suspend fun getDiscoverFeed(seedIds: List<String>, languages: List<String>, excludeIds: List<String>, skippedIds: List<String>, likedIds: List<String>, limit: Int): Result<List<Song>> = Result.success(emptyList())
         override fun getFavorites(): Flow<List<Song>> = MutableStateFlow(emptyList())
         override fun isFavorite(songId: String): Flow<Boolean> = MutableStateFlow(false)
         override suspend fun toggleFavorite(song: Song): Boolean = true
