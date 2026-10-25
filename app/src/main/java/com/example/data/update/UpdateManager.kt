@@ -255,6 +255,6 @@ class UpdateManager(
 
         const val OFFICIAL_TELEGRAM_URL = "https://t.me/VyomaOfficial"
         const val DEFAULT_CONFIG_URL =
-            "https://raw.githubusercontent.com/VyomaOfficial/vybe/main/config/app-update.json"
+            "https://raw.githubusercontent.com/omnjeee-wq/Only-new-vyb/main/config/app-update.json"
     }
 }
