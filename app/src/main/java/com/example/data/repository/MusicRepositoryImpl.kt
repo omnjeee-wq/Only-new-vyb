@@ -269,6 +269,7 @@ class MusicRepositoryImpl(
     }
 
     private val queueUrl = "https://sdk.omnjeee.workers.dev/queue"
+    private val discoverUrl = "https://sdk.omnjeee.workers.dev/discover"
 
     override suspend fun getRadioQueue(
         songId: String,
@@ -316,6 +317,33 @@ class MusicRepositoryImpl(
                 val old = apiService.getSongSuggestions(id = songId, limit = limit)
                 Result.success(old.data?.map { MusicUtils.toDomainSong(it, preferredQuality = quality) } ?: emptyList())
             }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getDiscoverFeed(
+        seedIds: List<String>,
+        languages: List<String>,
+        excludeIds: List<String>,
+        skippedIds: List<String>,
+        likedIds: List<String>,
+        limit: Int
+    ): Result<List<Song>> = withContext(Dispatchers.IO) {
+        try {
+            val quality = songDao.getPreference("pref_streaming_quality") ?: "High (320 kbps)"
+            val response = apiService.getDiscover(
+                url = discoverUrl,
+                seeds = seedIds.joinToString(","),
+                langs = languages.joinToString(","),
+                exclude = excludeIds.takeLast(70).joinToString(","),
+                limit = limit,
+                skipped = skippedIds.joinToString(","),
+                liked = likedIds.joinToString(",")
+            )
+            Result.success(
+                response.data?.map { MusicUtils.toDomainSong(it, preferredQuality = quality) } ?: emptyList()
+            )
         } catch (e: Exception) {
             Result.failure(e)
         }
