@@ -77,4 +77,15 @@ interface JioSaavnApiService {
         @Query("skipped") skipped: String = "",
         @Query("liked") liked: String = ""
     ): ApiResponse<List<ApiSong>>
+
+    @GET
+    suspend fun getDiscover(
+        @Url url: String,
+        @Query("seeds") seeds: String,
+        @Query("langs") langs: String,
+        @Query("exclude") exclude: String,
+        @Query("limit") limit: Int = 16,
+        @Query("skipped") skipped: String = "",
+        @Query("liked") liked: String = ""
+    ): ApiResponse<List<ApiSong>>
 }
