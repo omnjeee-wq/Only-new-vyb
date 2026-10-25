@@ -21,10 +21,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication.Starting">
+
+        <!-- Android 16+ (targetSdk 36) tablets/foldables pe orientation lock ignore hota hai.
+             Ye property us behavior se opt-out karti hai, taaki app portrait me hi rahe. -->
+        <property
+            android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY"
+            android:value="true" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.MyApplication.Starting">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
