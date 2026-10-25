@@ -18,6 +18,14 @@ interface MusicRepository {
     suspend fun getArtistTopSongs(artistId: String): Result<List<Song>>
     suspend fun getSongById(songId: String): Result<Song>
     suspend fun getRadioQueue(songId: String, limit: Int = 10, excludeIds: List<String> = emptyList()): Result<List<Song>>
+    suspend fun getDiscoverFeed(
+        seedIds: List<String>,
+        languages: List<String>,
+        excludeIds: List<String>,
+        skippedIds: List<String>,
+        likedIds: List<String>,
+        limit: Int = 16
+    ): Result<List<Song>>
     
     // Local persistence & user behavior
     fun getFavorites(): Flow<List<Song>>
