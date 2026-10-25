@@ -7,7 +7,7 @@
   "minimum_supported_version": "1.0.0",
   "config_version": 1,
   "release_notes": "VYBE v1.0.0: Initial stable release with responsive Hero Banner and hardened application security.",
-  "config_url": "https://raw.githubusercontent.com/VyomaOfficial/vybe/main/config/app-update.json",
+  "config_url": "https://raw.githubusercontent.com/omnjeee-wq/Only-new-vyb/main/config/app-update.json",
   "remote_config": {
     "custom_api_base_url": null,
     "announcement_banner": {
