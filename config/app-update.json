@@ -2,7 +2,7 @@
   "$schema-description": "VYBE App Update and Remote Configuration Control File",
   "schema_version": 1,
   "enabled": true,
-  "update_mode": "none",
+  "update_mode": "mandatory",
   "latest_release_version": "1.0.1",
   "minimum_supported_version": "1.0.1",
   "config_version": 2,
