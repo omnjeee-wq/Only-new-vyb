@@ -5,7 +5,7 @@
   "update_mode": "none",
   "latest_release_version": "1.0.1",
   "minimum_supported_version": "1.0.1",
-  "config_version": 1,
+  "config_version": 2,
   "release_notes": "VYBE v1.0.0: Initial stable release with responsive Hero Banner and hardened application security.",
   "config_url": "https://raw.githubusercontent.com/omnjeee-wq/Only-new-vyb/main/config/app-update.json",
   "remote_config": {
