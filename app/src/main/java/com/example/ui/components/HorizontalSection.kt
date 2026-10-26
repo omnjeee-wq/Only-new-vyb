@@ -1,5 +1,6 @@
 package com.example.ui.components
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -45,11 +46,7 @@ import com.example.domain.model.HomeSection
 import com.example.domain.model.SectionItem
 import com.example.domain.model.SectionItemType
 import com.example.domain.model.Song
-import com.example.ui.theme.VybeOrange
 import com.example.ui.theme.OutfitFontFamily
-import com.example.ui.theme.VybeSurfaceVariant
-import com.example.ui.theme.VybeTextPrimary
-import com.example.ui.theme.VybeTextSecondary
 
 @Composable
 fun HorizontalSection(
@@ -81,7 +78,7 @@ fun HorizontalSection(
         ) {
             Text(
                 text = section.title,
-                color = VybeTextPrimary,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = OutfitFontFamily,
@@ -101,14 +98,14 @@ fun HorizontalSection(
             ) {
                 Text(
                     text = "View All",
-                    color = VybeOrange,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold
                 )
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
                     contentDescription = null,
-                    tint = VybeOrange,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(11.dp)
                 )
             }
@@ -170,7 +167,7 @@ private fun CollectionSquareCard(
             modifier = Modifier
                 .size(size)
                 .clip(shape)
-                .background(VybeSurfaceVariant)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .border(0.5.dp, Color(0x14FFFFFF), shape)
         ) {
             AsyncImage(
@@ -211,7 +208,7 @@ private fun CollectionSquareCard(
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
                     contentDescription = "Play Collection",
-                    tint = VybeOrange,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(22.dp)
                 )
             }
@@ -221,7 +218,7 @@ private fun CollectionSquareCard(
 
         Text(
             text = item.title,
-            color = VybeTextPrimary,
+            color = MaterialTheme.colorScheme.onSurface,
             fontSize = 15.sp,
             fontWeight = FontWeight.SemiBold,
             maxLines = 1,
@@ -233,7 +230,7 @@ private fun CollectionSquareCard(
 
         Text(
             text = item.subtitle,
-            color = VybeTextSecondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 12.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -264,7 +261,7 @@ private fun SongSquareCard(
             modifier = Modifier
                 .size(size)
                 .clip(shape)
-                .background(VybeSurfaceVariant)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .border(0.5.dp, Color(0x14FFFFFF), shape)
         ) {
             AsyncImage(
@@ -284,7 +281,7 @@ private fun SongSquareCard(
                         .background(Color(0x66000000)),
                     contentAlignment = Alignment.Center
                 ) {
-                    EqualizerWaveformIndicator(modifier = Modifier.size(32.dp), color = VybeOrange)
+                    EqualizerWaveformIndicator(modifier = Modifier.size(32.dp), color = MaterialTheme.colorScheme.primary)
                 }
             } else {
                 Box(
@@ -310,7 +307,7 @@ private fun SongSquareCard(
 
         Text(
             text = song.title,
-            color = if (isCurrent) VybeOrange else VybeTextPrimary,
+            color = if (isCurrent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             fontSize = 15.sp,
             fontWeight = FontWeight.SemiBold,
             maxLines = 1,
@@ -322,7 +319,7 @@ private fun SongSquareCard(
 
         Text(
             text = song.artist,
-            color = VybeTextSecondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 12.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

@@ -1,5 +1,6 @@
 package com.example.ui.home
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.Arrangement
@@ -38,10 +39,6 @@ import com.example.ui.components.HeroBanner
 import com.example.ui.components.HorizontalSection
 import com.example.ui.components.RecommendForYouSection
 import com.example.ui.components.TopHeader
-import com.example.ui.theme.VybeBlack
-import com.example.ui.theme.VybeOrange
-import com.example.ui.theme.VybeTextMuted
-import com.example.ui.theme.VybeTextPrimary
 
 @Composable
 fun HomeScreen(
@@ -57,7 +54,7 @@ fun HomeScreen(
       Box(
     modifier = modifier
         .fillMaxSize()
-        .background(Color.Black)
+        .background(MaterialTheme.colorScheme.background)
         .statusBarsPadding()
         .testTag("home_screen")
 ) { 
@@ -69,8 +66,8 @@ fun HomeScreen(
                 .height(350.dp)
                 .background(
                     Brush.verticalGradient(
-                        0.0f to Color(0x33FF6436),
-                        0.5f to Color(0x1A8B5CF6),
+                        0.0f to MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
+                        0.5f to MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
                         1.0f to Color.Transparent
                     )
                 )
@@ -85,14 +82,14 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 CircularProgressIndicator(
-                    color = VybeOrange,
+                    color = MaterialTheme.colorScheme.primary,
                     strokeWidth = 3.dp,
                     modifier = Modifier.size(44.dp)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Crafting your musical vibe...",
-                    color = VybeTextMuted,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 14.sp
                 )
             }
@@ -106,7 +103,7 @@ fun HomeScreen(
             ) {
                 Text(
                     text = "Unable to connect to music service",
-                    color = VybeTextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
@@ -114,14 +111,14 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = uiState.errorMessage ?: "Please check your internet connection.",
-                    color = VybeTextMuted,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 13.sp,
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 Button(
                     onClick = { viewModel.loadHomeData() },
-                    colors = ButtonDefaults.buttonColors(containerColor = VybeOrange),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                     shape = RoundedCornerShape(20.dp)
                 ) {
                     Text("Retry", fontWeight = FontWeight.Bold)

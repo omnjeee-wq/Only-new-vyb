@@ -1,5 +1,6 @@
 package com.example.ui.library
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -53,15 +54,6 @@ import coil.request.ImageRequest
 import com.example.domain.model.Playlist
 import com.example.domain.model.Song
 import com.example.ui.components.EqualizerWaveformIndicator
-import com.example.ui.theme.VybeBorder
-import com.example.ui.theme.VybeCoral
-import com.example.ui.theme.VybeOrange
-import com.example.ui.theme.VybePink
-import com.example.ui.theme.VybeSurface
-import com.example.ui.theme.VybeSurfaceVariant
-import com.example.ui.theme.VybeTextMuted
-import com.example.ui.theme.VybeTextPrimary
-import com.example.ui.theme.VybeTextSecondary
 import com.example.util.MusicUtils
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.WindowInsets
@@ -89,7 +81,7 @@ fun UserPlaylistDetailContent(
         modifier = modifier
             .fillMaxSize()
             .statusBarsPadding()       
-            .background(VybeSurface)
+            .background(MaterialTheme.colorScheme.surface)
             .testTag("user_playlist_detail_screen")
     ) {
         // Top Navigation Bar
@@ -107,13 +99,13 @@ fun UserPlaylistDetailContent(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
-                    tint = VybeTextPrimary
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
             }
 
             Text(
                 text = "My Playlist",
-                color = VybeTextPrimary,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -125,7 +117,7 @@ fun UserPlaylistDetailContent(
                 Icon(
                     imageVector = Icons.Default.DeleteOutline,
                     contentDescription = "Delete Playlist",
-                    tint = VybeCoral
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         }
@@ -151,7 +143,7 @@ fun UserPlaylistDetailContent(
                             .clip(RoundedCornerShape(20.dp))
                             .background(
                                 Brush.linearGradient(
-                                    listOf(VybeOrange.copy(alpha = 0.8f), VybePink.copy(alpha = 0.8f))
+                                    listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.8f), MaterialTheme.colorScheme.primary.copy(alpha = 0.8f))
                                 )
                             ),
                         contentAlignment = Alignment.Center
@@ -180,7 +172,7 @@ fun UserPlaylistDetailContent(
 
                     Text(
                         text = playlist.title,
-                        color = VybeTextPrimary,
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
@@ -192,7 +184,7 @@ fun UserPlaylistDetailContent(
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = playlist.description,
-                            color = VybeTextSecondary,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 13.sp,
                             textAlign = TextAlign.Center,
                             maxLines = 2,
@@ -204,7 +196,7 @@ fun UserPlaylistDetailContent(
 
                     Text(
                         text = "${songs.size} ${if (songs.size == 1) "track" else "tracks"} • Custom Playlist",
-                        color = VybeOrange,
+                        color = MaterialTheme.colorScheme.primary,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium
                     )
@@ -223,7 +215,7 @@ fun UserPlaylistDetailContent(
                             shape = RoundedCornerShape(24.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color.Transparent,
-                                disabledContainerColor = VybeSurfaceVariant
+                                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
                             ),
                             contentPadding = PaddingValues(0.dp),
                             modifier = Modifier
@@ -232,7 +224,7 @@ fun UserPlaylistDetailContent(
                                 .clip(RoundedCornerShape(24.dp))
                                 .background(
                                     Brush.horizontalGradient(
-                                        listOf(VybeOrange, VybePink)
+                                        listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary)
                                     )
                                 )
                                 .testTag("playlist_play_all")
@@ -260,9 +252,9 @@ fun UserPlaylistDetailContent(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.Center
                             ) {
-                                Icon(Icons.Default.Shuffle, contentDescription = null, tint = VybeOrange, modifier = Modifier.size(18.dp))
+                                Icon(Icons.Default.Shuffle, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Shuffle", color = VybeOrange, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                                Text("Shuffle", color = MaterialTheme.colorScheme.primary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
@@ -278,9 +270,9 @@ fun UserPlaylistDetailContent(
                             .height(42.dp)
                             .testTag("open_add_songs_button")
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = null, tint = VybeTextPrimary, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Default.Add, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Add Songs to Playlist", color = VybeTextPrimary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                        Text("Add Songs to Playlist", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
@@ -297,20 +289,20 @@ fun UserPlaylistDetailContent(
                         Icon(
                             imageVector = Icons.Default.MusicNote,
                             contentDescription = null,
-                            tint = VybeTextMuted,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(48.dp)
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = "This playlist is empty",
-                            color = VybeTextPrimary,
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = "Tap 'Add Songs to Playlist' above to populate this playlist with your favorite music.",
-                            color = VybeTextMuted,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 13.sp,
                             textAlign = TextAlign.Center
                         )
@@ -340,12 +332,12 @@ fun UserPlaylistDetailContent(
                                 EqualizerWaveformIndicator(
                                     modifier = Modifier.size(18.dp),
                                     isPlaying = true,
-                                    color = VybeOrange
+                                    color = MaterialTheme.colorScheme.primary
                                 )
                             } else {
                                 Text(
                                     text = "${index + 1}",
-                                    color = if (isCurrent) VybeOrange else VybeTextMuted,
+                                    color = if (isCurrent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -357,7 +349,7 @@ fun UserPlaylistDetailContent(
                             modifier = Modifier
                                 .size(46.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(VybeSurfaceVariant)
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
                         ) {
                             AsyncImage(
                                 model = ImageRequest.Builder(context)
@@ -376,7 +368,7 @@ fun UserPlaylistDetailContent(
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = song.title,
-                                color = if (isCurrent) VybeOrange else VybeTextPrimary,
+                                color = if (isCurrent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 maxLines = 1,
@@ -385,7 +377,7 @@ fun UserPlaylistDetailContent(
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = song.artist,
-                                color = VybeTextSecondary,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 12.sp,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
@@ -395,7 +387,7 @@ fun UserPlaylistDetailContent(
                         // Duration
                         Text(
                             text = MusicUtils.formatDuration(song.durationSeconds),
-                            color = VybeTextMuted,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 11.sp
                         )
 
@@ -409,7 +401,7 @@ fun UserPlaylistDetailContent(
                             Icon(
                                 imageVector = Icons.Default.Delete,
                                 contentDescription = "Remove",
-                                tint = VybeTextMuted,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(18.dp)
                             )
                         }

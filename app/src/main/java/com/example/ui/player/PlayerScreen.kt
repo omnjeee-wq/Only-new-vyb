@@ -1,5 +1,6 @@
 package com.example.ui.player
 
+import androidx.compose.material3.MaterialTheme
 import android.content.Context
 import android.content.Intent
 import android.text.Html
@@ -30,7 +31,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import com.example.ui.theme.GlowOrange
 import com.example.ui.theme.GlowPink
 import com.example.ui.theme.OutfitFontFamily
 import com.example.ui.theme.neonGlow
@@ -102,18 +102,6 @@ import coil.request.ImageRequest
 import com.example.domain.model.Song
 import com.example.player.PlayerManager
 import com.example.ui.components.EqualizerWaveformIndicator
-import com.example.ui.theme.VybeBlack
-import com.example.ui.theme.VybeBorder
-import com.example.ui.theme.VybeCoral
-import com.example.ui.theme.VybeElectricCyan
-import com.example.ui.theme.VybeNearBlack
-import com.example.ui.theme.VybeOrange
-import com.example.ui.theme.VybePink
-import com.example.ui.theme.VybeSurface
-import com.example.ui.theme.VybeSurfaceVariant
-import com.example.ui.theme.VybeTextMuted
-import com.example.ui.theme.VybeTextPrimary
-import com.example.ui.theme.VybeTextSecondary
 import com.example.util.MusicUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -261,7 +249,7 @@ fun PlayerScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(VybeBlack)
+            .background(MaterialTheme.colorScheme.background)
             .testTag("full_player_screen")
     ) {
         // Atmospheric Glow Background from Song Artwork
@@ -288,9 +276,9 @@ fun PlayerScreen(
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
-                            0.0f to Color(0xEB0A0A0E),
-                            0.4f to Color(0xD90A0A0E),
-                            1.0f to Color(0xFA0A0A0E)
+                            0.0f to MaterialTheme.colorScheme.background.copy(alpha = 0.92f),
+                            0.4f to MaterialTheme.colorScheme.background.copy(alpha = 0.96f),
+                            1.0f to MaterialTheme.colorScheme.background.copy(alpha = 0.99f)
                         )
                     )
             )
@@ -317,13 +305,13 @@ fun PlayerScreen(
                     onClick = onCollapse,
                     modifier = Modifier
                         .size(40.dp)
-                        .background(Color(0x22FFFFFF), CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f), CircleShape)
                         .testTag("collapse_player_button")
                 ) {
                     Icon(
                         imageVector = Icons.Default.KeyboardArrowDown,
                         contentDescription = "Collapse Player",
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(28.dp)
                     )
                 }
@@ -333,14 +321,14 @@ fun PlayerScreen(
                 ) {
                     Text(
                         text = "PLAYING FROM",
-                        color = VybeTextMuted,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 2.sp
                     )
                     Text(
                         text = playerState.playlistName,
-                        color = VybeTextPrimary,
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 1,
@@ -353,13 +341,13 @@ fun PlayerScreen(
                         onClick = { showMenu = true },
                         modifier = Modifier
                             .size(40.dp)
-                            .background(Color(0x22FFFFFF), CircleShape)
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f), CircleShape)
                             .testTag("player_options_button")
                     ) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
                             contentDescription = "Options",
-                            tint = Color.White,
+                            tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(22.dp)
                         )
                     }
@@ -367,15 +355,15 @@ fun PlayerScreen(
                     DropdownMenu(
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false },
-                        modifier = Modifier.background(VybeSurfaceVariant)
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Share Track", color = VybeTextPrimary) },
+                            text = { Text("Share Track", color = MaterialTheme.colorScheme.onSurface) },
                             leadingIcon = {
                                 Icon(
                                     Icons.Outlined.Share,
                                     contentDescription = null,
-                                    tint = VybeOrange
+                                    tint = MaterialTheme.colorScheme.primary
                                 )
                             },
                             onClick = {
@@ -385,12 +373,12 @@ fun PlayerScreen(
                         )
 
                         DropdownMenuItem(
-                            text = { Text("Add to Playlist", color = VybeTextPrimary) },
+                            text = { Text("Add to Playlist", color = MaterialTheme.colorScheme.onSurface) },
                             leadingIcon = {
                                 Icon(
                                     Icons.Default.PlaylistAdd,
                                     contentDescription = null,
-                                    tint = VybeOrange
+                                    tint = MaterialTheme.colorScheme.primary
                                 )
                             },
                             onClick = {
@@ -403,7 +391,7 @@ fun PlayerScreen(
                             text = {
                                 Text(
                                     if (isDownloaded) "Downloaded" else "Download Track",
-                                    color = VybeTextPrimary
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                             },
                             leadingIcon = {
@@ -414,7 +402,7 @@ fun PlayerScreen(
                                         Icons.Default.Download
                                     },
                                     contentDescription = null,
-                                    tint = VybeElectricCyan
+                                    tint = MaterialTheme.colorScheme.primary
                                 )
                             },
                             onClick = {
@@ -428,12 +416,12 @@ fun PlayerScreen(
                         )
 
                         DropdownMenuItem(
-                            text = { Text("View Queue", color = VybeTextPrimary) },
+                            text = { Text("View Queue", color = MaterialTheme.colorScheme.onSurface) },
                             leadingIcon = {
                                 Icon(
                                     Icons.AutoMirrored.Filled.QueueMusic,
                                     contentDescription = null,
-                                    tint = VybeTextSecondary
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             },
                             onClick = {
@@ -454,10 +442,10 @@ fun PlayerScreen(
                     .shadow(
                         32.dp,
                         RoundedCornerShape(24.dp),
-                        spotColor = VybeOrange.copy(alpha = 0.35f)
+                        spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
                     )
                     .clip(RoundedCornerShape(24.dp))
-                    .background(VybeSurfaceVariant)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
                     .testTag("player_artwork")
             ) {
                 if (currentSong != null) {
@@ -478,7 +466,7 @@ fun PlayerScreen(
                         Icon(
                             imageVector = Icons.Default.PlayArrow,
                             contentDescription = null,
-                            tint = VybeTextMuted,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(64.dp)
                         )
                     }
@@ -492,7 +480,7 @@ fun PlayerScreen(
                             .background(Color(0x66000000)),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = VybeOrange)
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
@@ -510,7 +498,7 @@ fun PlayerScreen(
                 ) {
                     Text(
                         text = currentSong?.title ?: "No Track Selected",
-                        color = VybeTextPrimary,
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
@@ -519,7 +507,7 @@ fun PlayerScreen(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = currentSong?.artist ?: "Vybe Music",
-                        color = VybeTextSecondary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Normal,
                         maxLines = 1,
@@ -543,7 +531,7 @@ fun PlayerScreen(
                         tint = if (isLiked) {
                             Color.Red
                         } else {
-                            VybeTextSecondary
+                            MaterialTheme.colorScheme.onSurfaceVariant
                         },
                         modifier = Modifier.size(28.dp)
                     )
@@ -586,9 +574,9 @@ fun PlayerScreen(
                         imageVector = Icons.Default.Shuffle,
                         contentDescription = "Shuffle",
                         tint = if (playerState.isShuffleEnabled) {
-                            VybeOrange
+                            MaterialTheme.colorScheme.primary
                         } else {
-                            VybeTextMuted
+                            MaterialTheme.colorScheme.onSurfaceVariant
                         },
                         modifier = Modifier.size(24.dp)
                     )
@@ -602,7 +590,7 @@ fun PlayerScreen(
                     Icon(
                         imageVector = Icons.Default.SkipPrevious,
                         contentDescription = "Previous",
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(36.dp)
                     )
                 }
@@ -612,7 +600,7 @@ fun PlayerScreen(
                     modifier = Modifier
                         .size(68.dp)
                         .pulsingGlow(
-                            color = VybePink,
+                            color = MaterialTheme.colorScheme.primary,
                             minRadius = 10.dp,
                             maxRadius = 22.dp,
                             minAlpha = 0.35f,
@@ -621,12 +609,12 @@ fun PlayerScreen(
                         .clip(CircleShape)
                         .background(
                             Brush.linearGradient(
-                                listOf(VybePink, VybeOrange)
+                                listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary)
                             )
                         )
                         .border(
                             1.5.dp,
-                            Color.White.copy(alpha = 0.35f),
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
                             CircleShape
                         )
                         .clickable { playerManager.togglePlayPause() }
@@ -640,7 +628,7 @@ fun PlayerScreen(
                             Icons.Default.PlayArrow
                         },
                         contentDescription = if (playerState.isPlaying) "Pause" else "Play",
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(34.dp)
                     )
                 }
@@ -653,7 +641,7 @@ fun PlayerScreen(
                     Icon(
                         imageVector = Icons.Default.SkipNext,
                         contentDescription = "Next",
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(36.dp)
                     )
                 }
@@ -672,9 +660,9 @@ fun PlayerScreen(
                     val tint = if (
                         playerState.repeatMode != Player.REPEAT_MODE_OFF
                     ) {
-                        VybeOrange
+                        MaterialTheme.colorScheme.primary
                     } else {
-                        VybeTextMuted
+                        MaterialTheme.colorScheme.onSurfaceVariant
                     }
 
                     Icon(
@@ -698,7 +686,7 @@ fun PlayerScreen(
                 Row(
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
-                        .background(VybeSurface)
+                        .background(MaterialTheme.colorScheme.surface)
                         .clickable { showLyricsSheet = true }
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                         .testTag("lyrics_button"),
@@ -708,12 +696,12 @@ fun PlayerScreen(
                     Icon(
                         imageVector = Icons.Outlined.Lyrics,
                         contentDescription = "Lyrics",
-                        tint = VybeElectricCyan,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(18.dp)
                     )
                     Text(
                         text = "Lyrics",
-                        color = VybeTextPrimary,
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -723,7 +711,7 @@ fun PlayerScreen(
                 Row(
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
-                        .background(VybeSurface)
+                        .background(MaterialTheme.colorScheme.surface)
                         .clickable { showQueueSheet = true }
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                         .testTag("queue_button"),
@@ -733,12 +721,12 @@ fun PlayerScreen(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.QueueMusic,
                         contentDescription = "Queue",
-                        tint = VybeOrange,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(18.dp)
                     )
                     Text(
                         text = "Queue (${playerState.queue.size})",
-                        color = VybeTextPrimary,
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -751,7 +739,7 @@ fun PlayerScreen(
             ModalBottomSheet(
                 onDismissRequest = { showQueueSheet = false },
                 sheetState = sheetState,
-                containerColor = VybeNearBlack
+                containerColor = MaterialTheme.colorScheme.surface
             ) {
                 Column(
                     modifier = Modifier
@@ -765,7 +753,7 @@ fun PlayerScreen(
                     ) {
                         Text(
                             text = "Now Playing & Queue",
-                            color = VybeTextPrimary,
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -782,7 +770,7 @@ fun PlayerScreen(
                             Icon(
                                 Icons.Default.Close,
                                 contentDescription = "Close",
-                                tint = VybeTextSecondary
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -804,9 +792,9 @@ fun PlayerScreen(
                                     .clip(RoundedCornerShape(10.dp))
                                     .background(
                                         if (isCurrent) {
-                                            Color(0x1FFF6436)
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
                                         } else {
-                                            VybeSurface
+                                            MaterialTheme.colorScheme.surface
                                         }
                                     )
                                     .clickable {
@@ -823,7 +811,7 @@ fun PlayerScreen(
                                     modifier = Modifier
                                         .size(44.dp)
                                         .clip(RoundedCornerShape(8.dp))
-                                        .background(VybeSurfaceVariant)
+                                        .background(MaterialTheme.colorScheme.surfaceVariant)
                                 ) {
                                     AsyncImage(
                                         model = ImageRequest.Builder(context)
@@ -844,9 +832,9 @@ fun PlayerScreen(
                                     Text(
                                         text = song.title,
                                         color = if (isCurrent) {
-                                            VybeOrange
+                                            MaterialTheme.colorScheme.primary
                                         } else {
-                                            VybeTextPrimary
+                                            MaterialTheme.colorScheme.onSurface
                                         },
                                         fontSize = 14.sp,
                                         fontWeight = FontWeight.SemiBold,
@@ -856,7 +844,7 @@ fun PlayerScreen(
 
                                     Text(
                                         text = song.artist,
-                                        color = VybeTextSecondary,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         fontSize = 12.sp,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
@@ -866,7 +854,7 @@ fun PlayerScreen(
                                 if (isCurrent && playerState.isPlaying) {
                                     EqualizerWaveformIndicator(
                                         modifier = Modifier.size(20.dp),
-                                        color = VybeOrange
+                                        color = MaterialTheme.colorScheme.primary
                                     )
                                 } else {
                                     IconButton(
@@ -878,7 +866,7 @@ fun PlayerScreen(
                                         Icon(
                                             imageVector = Icons.Default.Close,
                                             contentDescription = "Remove",
-                                            tint = VybeTextMuted,
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                             modifier = Modifier.size(16.dp)
                                         )
                                     }
@@ -895,7 +883,7 @@ fun PlayerScreen(
             ModalBottomSheet(
                 onDismissRequest = { showLyricsSheet = false },
                 sheetState = sheetState,
-                containerColor = VybeNearBlack,
+                containerColor = MaterialTheme.colorScheme.surface,
                 dragHandle = null,
                 modifier = Modifier.fillMaxSize()
             ) {
@@ -915,14 +903,14 @@ fun PlayerScreen(
                         ) {
                             Text(
                                 text = "Lyrics",
-                                color = VybeTextPrimary,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(3.dp))
                             Text(
                                 text = "${currentSong?.title ?: "Unknown"} — ${currentSong?.artist ?: "Unknown"}",
-                                color = VybeTextSecondary,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 13.sp,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
@@ -934,14 +922,14 @@ fun PlayerScreen(
                             modifier = Modifier
                                 .size(42.dp)
                                 .background(
-                                    VybeSurfaceVariant.copy(alpha = 0.8f),
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f),
                                     CircleShape
                                 )
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "Close lyrics",
-                                tint = VybeTextPrimary,
+                                tint = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.size(22.dp)
                             )
                         }
@@ -951,7 +939,7 @@ fun PlayerScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(1.dp)
-                            .background(VybeBorder.copy(alpha = 0.45f))
+                            .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.45f))
                     )
 
                     Box(
@@ -979,13 +967,13 @@ fun PlayerScreen(
                                             horizontalAlignment = Alignment.CenterHorizontally
                                         ) {
                                             CircularProgressIndicator(
-                                                color = VybeOrange,
+                                                color = MaterialTheme.colorScheme.primary,
                                                 modifier = Modifier.size(34.dp)
                                             )
                                             Spacer(modifier = Modifier.height(14.dp))
                                             Text(
                                                 text = "Loading lyrics…",
-                                                color = VybeTextMuted,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                                 fontSize = 14.sp
                                             )
                                         }
@@ -1000,14 +988,14 @@ fun PlayerScreen(
                                         ) {
                                             Text(
                                                 text = lyricsError ?: "Lyrics unavailable",
-                                                color = VybeTextMuted,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                                 fontSize = 15.sp,
                                                 textAlign = TextAlign.Center
                                             )
                                             Spacer(modifier = Modifier.height(8.dp))
                                             Text(
                                                 text = "Lyrics may not be available for this track.",
-                                                color = VybeTextMuted.copy(alpha = 0.7f),
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                                                 fontSize = 13.sp,
                                                 textAlign = TextAlign.Center
                                             )
@@ -1017,7 +1005,7 @@ fun PlayerScreen(
                                     !lyricsText.isNullOrBlank() -> {
                                         Text(
                                             text = lyricsText.orEmpty(),
-                                            color = VybeTextPrimary,
+                                            color = MaterialTheme.colorScheme.onSurface,
                                             fontSize = 18.sp,
                                             lineHeight = 31.sp,
                                             fontWeight = FontWeight.Normal,
@@ -1031,7 +1019,7 @@ fun PlayerScreen(
                                     else -> {
                                         Text(
                                             text = "Lyrics are not available for this song.",
-                                            color = VybeTextMuted,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             fontSize = 15.sp,
                                             textAlign = TextAlign.Center,
                                             modifier = Modifier
@@ -1048,7 +1036,7 @@ fun PlayerScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(VybeSurfaceVariant)
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
                             .padding(horizontal = 20.dp, vertical = 10.dp)
                     ) {
                         Row(
@@ -1060,7 +1048,7 @@ fun PlayerScreen(
                             ) {
                                 Text(
                                     text = currentSong?.title ?: "No Track Selected",
-                                    color = VybeTextPrimary,
+                                    color = MaterialTheme.colorScheme.onSurface,
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     maxLines = 1,
@@ -1068,7 +1056,7 @@ fun PlayerScreen(
                                 )
                                 Text(
                                     text = currentSong?.artist ?: "Vybe Music",
-                                    color = VybeTextSecondary,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontSize = 12.sp,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
@@ -1082,7 +1070,7 @@ fun PlayerScreen(
                                 Icon(
                                     imageVector = Icons.Default.SkipPrevious,
                                     contentDescription = "Previous",
-                                    tint = VybeTextPrimary,
+                                    tint = MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.size(25.dp)
                                 )
                             }
@@ -1093,7 +1081,7 @@ fun PlayerScreen(
                                     .clip(CircleShape)
                                     .background(
                                         Brush.linearGradient(
-                                            listOf(VybePink, VybeOrange)
+                                            listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary)
                                         )
                                     )
                                     .clickable {
@@ -1112,7 +1100,7 @@ fun PlayerScreen(
                                     } else {
                                         "Play"
                                     },
-                                    tint = Color.White,
+                                    tint = MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.size(26.dp)
                                 )
                             }
@@ -1124,7 +1112,7 @@ fun PlayerScreen(
                                 Icon(
                                     imageVector = Icons.Default.SkipNext,
                                     contentDescription = "Next",
-                                    tint = VybeTextPrimary,
+                                    tint = MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.size(25.dp)
                                 )
                             }
@@ -1152,7 +1140,7 @@ fun PlayerScreen(
         if (showAddToPlaylistSheet && currentSong != null) {
             ModalBottomSheet(
                 onDismissRequest = { showAddToPlaylistSheet = false },
-                containerColor = VybeSurface,
+                containerColor = MaterialTheme.colorScheme.surface,
                 dragHandle = null
             ) {
                 Column(
@@ -1167,7 +1155,7 @@ fun PlayerScreen(
                     ) {
                         Text(
                             text = "Add to Playlist",
-                            color = VybeTextPrimary,
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -1178,7 +1166,7 @@ fun PlayerScreen(
                             Icon(
                                 Icons.Default.Close,
                                 contentDescription = "Close",
-                                tint = VybeTextSecondary
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -1188,7 +1176,7 @@ fun PlayerScreen(
                     if (userPlaylists.isEmpty()) {
                         Text(
                             text = "No custom playlists found. Go to Library -> Playlists -> My Playlist to create one!",
-                            color = VybeTextMuted,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 13.sp,
                             modifier = Modifier.padding(vertical = 20.dp)
                         )
@@ -1205,7 +1193,7 @@ fun PlayerScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clip(RoundedCornerShape(12.dp))
-                                        .background(VybeSurfaceVariant)
+                                        .background(MaterialTheme.colorScheme.surfaceVariant)
                                         .clickable {
                                             scope.launch {
                                                 VybeApp.instance.repository.addSongToUserPlaylist(
@@ -1221,7 +1209,7 @@ fun PlayerScreen(
                                     Icon(
                                         imageVector = Icons.AutoMirrored.Filled.QueueMusic,
                                         contentDescription = null,
-                                        tint = VybeOrange,
+                                        tint = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.size(24.dp)
                                     )
 
@@ -1229,7 +1217,7 @@ fun PlayerScreen(
 
                                     Text(
                                         text = playlist.title,
-                                        color = VybeTextPrimary,
+                                        color = MaterialTheme.colorScheme.onSurface,
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.SemiBold
                                     )
@@ -1389,7 +1377,7 @@ fun YouTubePlayerTimeline(
                     .fillMaxWidth()
                     .height(animatedTrackHeight)
                     .clip(CircleShape)
-                    .background(Color(0x33FFFFFF))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f))
             )
 
             // Active Track
@@ -1400,7 +1388,7 @@ fun YouTubePlayerTimeline(
                     .clip(CircleShape)
                     .background(
                         Brush.horizontalGradient(
-                            listOf(VybePink, VybeOrange)
+                            listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary)
                         )
                     )
             )
@@ -1415,15 +1403,15 @@ fun YouTubePlayerTimeline(
                     )
                     .size(animatedThumbRadius * 2)
                     .neonGlow(
-                        color = GlowOrange,
+                        color = MaterialTheme.colorScheme.primary,
                         radius = if (isSeeking) 14.dp else 6.dp,
                         alpha = if (isSeeking) 0.85f else 0.55f
                     )
                     .clip(CircleShape)
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.onSurface)
                     .border(
                         width = if (isSeeking) 2.dp else 1.5.dp,
-                        color = Color(0xFFFF5E3A),
+                        color = MaterialTheme.colorScheme.primary,
                         shape = CircleShape
                     )
             )
@@ -1440,7 +1428,7 @@ fun YouTubePlayerTimeline(
         ) {
             Text(
                 text = MusicUtils.formatDurationMs(displayedCurrentMs),
-                color = if (isSeeking) VybeOrange else VybeTextSecondary,
+                color = if (isSeeking) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
                 fontFamily = OutfitFontFamily,
                 fontWeight = if (isSeeking) FontWeight.Bold else FontWeight.Medium
@@ -1448,7 +1436,7 @@ fun YouTubePlayerTimeline(
 
             Text(
                 text = MusicUtils.formatDurationMs(durationMs),
-                color = VybeTextMuted,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
                 fontFamily = OutfitFontFamily,
                 fontWeight = FontWeight.Normal

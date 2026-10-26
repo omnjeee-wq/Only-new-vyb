@@ -41,8 +41,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.update.UpdateState
-import com.example.ui.theme.VybeBlack
-import com.example.ui.theme.VybeOrange
 
 @Composable
 fun MandatoryUpdateScreen(
@@ -61,8 +59,8 @@ fun MandatoryUpdateScreen(
     Surface(
         modifier = modifier
             .fillMaxSize()
-            .background(VybeBlack),
-        color = VybeBlack
+            .background(MaterialTheme.colorScheme.background),
+        color = MaterialTheme.colorScheme.background
     ) {
         Box(
             modifier = Modifier
@@ -85,7 +83,7 @@ fun MandatoryUpdateScreen(
                         .background(
                             Brush.radialGradient(
                                 colors = listOf(
-                                    VybeOrange.copy(alpha = 0.35f),
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
                                     Color.Transparent
                                 )
                             )
@@ -93,7 +91,7 @@ fun MandatoryUpdateScreen(
                         .border(
                             width = 2.dp,
                             brush = Brush.linearGradient(
-                                colors = listOf(VybeOrange, Color(0xFFFF8C00))
+                                colors = listOf(MaterialTheme.colorScheme.primary, Color(0xFFFF8C00))
                             ),
                             shape = CircleShape
                         ),
@@ -102,7 +100,7 @@ fun MandatoryUpdateScreen(
                     Icon(
                         imageVector = Icons.Default.SystemUpdate,
                         contentDescription = "Update Required",
-                        tint = VybeOrange,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(48.dp)
                     )
                 }
@@ -112,12 +110,12 @@ fun MandatoryUpdateScreen(
                 // Badge
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = VybeOrange.copy(alpha = 0.15f),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
                     border = null
                 ) {
                     Text(
                         text = "CRITICAL UPDATE REQUIRED",
-                        color = VybeOrange,
+                        color = MaterialTheme.colorScheme.primary,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp,
@@ -238,7 +236,7 @@ fun MandatoryUpdateScreen(
                 // Primary Action Button (Opens Telegram)
                 Button(
                     onClick = onUpdateClick,
-                    colors = ButtonDefaults.buttonColors(containerColor = VybeOrange),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier
                         .fillMaxWidth()

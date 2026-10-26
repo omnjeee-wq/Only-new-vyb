@@ -1,5 +1,6 @@
 package com.example.ui.library
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -87,20 +88,6 @@ import com.example.ui.components.CollectionDetailSheet
 import com.example.ui.components.EqualizerWaveformIndicator
 import com.example.ui.components.TopHeader
 import com.example.ui.home.CollectionDetailState
-import com.example.ui.theme.VybeBlack
-import com.example.ui.theme.VybeBorder
-import com.example.ui.theme.VybeCoral
-import com.example.ui.theme.VybeElectricCyan
-import com.example.ui.theme.VybeGlass
-import com.example.ui.theme.VybeNearBlack
-import com.example.ui.theme.VybeOrange
-import com.example.ui.theme.VybePink
-import com.example.ui.theme.VybePurple
-import com.example.ui.theme.VybeSurface
-import com.example.ui.theme.VybeSurfaceVariant
-import com.example.ui.theme.VybeTextMuted
-import com.example.ui.theme.VybeTextPrimary
-import com.example.ui.theme.VybeTextSecondary
 import com.example.util.MusicUtils
 
 @Composable
@@ -163,7 +150,7 @@ fun LibraryScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(VybeBlack)
+            .background(MaterialTheme.colorScheme.background)
             .testTag("library_screen")
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -177,13 +164,13 @@ fun LibraryScreen(
             ) {
                 Text(
                     text = "Your Library",
-                    color = VybeTextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "Playlists, liked tracks, albums and downloads",
-                    color = VybeTextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 12.sp
                 )
             }
@@ -347,7 +334,7 @@ private fun LibraryCategoryChip(
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(20.dp))
-            .background(if (selected) VybeOrange else VybeSurfaceVariant)
+            .background(if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
             .clickable { onClick() }
             .padding(horizontal = 14.dp, vertical = 8.dp)
             .testTag("library_tab_${label.take(6).lowercase()}"),
@@ -355,7 +342,7 @@ private fun LibraryCategoryChip(
     ) {
         Text(
             text = label,
-            color = if (selected) Color.White else VybeTextSecondary,
+            color = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 13.sp,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
         )
@@ -389,7 +376,7 @@ private fun LibraryOverviewContent(
                 title = "Liked Songs",
                 subtitle = "$likedSongsCount songs saved to your vibe",
                 icon = Icons.Default.Favorite,
-                gradient = listOf(VybePink, Color(0xFF7C3AED)),
+                gradient = listOf(MaterialTheme.colorScheme.primary, Color(0xFF7C3AED)),
                 onClick = onOpenLikedSongs,
                 testTag = "card_liked_songs"
             )
@@ -401,7 +388,7 @@ private fun LibraryOverviewContent(
                 title = "Playlists",
                 subtitle = "$myPlaylistsCount My Playlists • $likedPlaylistsCount Liked Playlists",
                 icon = Icons.AutoMirrored.Filled.QueueMusic,
-                gradient = listOf(VybeOrange, VybeCoral),
+                gradient = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary),
                 onClick = onOpenPlaylists,
                 testTag = "card_playlists"
             )
@@ -428,7 +415,7 @@ private fun LibraryOverviewContent(
                     title = "Downloads",
                     subtitle = "$downloadsCount offline tracks",
                     icon = Icons.Default.DownloadDone,
-                    gradient = listOf(VybeElectricCyan, Color(0xFF10B981)),
+                    gradient = listOf(MaterialTheme.colorScheme.primary, Color(0xFF10B981)),
                     onClick = onOpenDownloads,
                     modifier = Modifier.weight(1f),
                     testTag = "card_downloads"
@@ -443,19 +430,19 @@ private fun LibraryOverviewContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(16.dp))
-                    .background(VybeSurfaceVariant)
-                    .border(1.dp, VybeBorder, RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
                     .clickable { onCreatePlaylist() }
                     .padding(16.dp)
                     .testTag("overview_create_playlist_btn"),
                 contentAlignment = Alignment.Center
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Add, contentDescription = null, tint = VybeOrange)
+                    Icon(Icons.Default.Add, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Create a New Playlist",
-                        color = VybeTextPrimary,
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -612,7 +599,7 @@ private fun PlaylistsTabContent(
                     .weight(1f)
                     .clip(RoundedCornerShape(14.dp))
                     .background(
-                        if (selectedSubTab == PlaylistSubTab.MY_PLAYLISTS) VybeOrange else VybeSurfaceVariant
+                        if (selectedSubTab == PlaylistSubTab.MY_PLAYLISTS) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
                     )
                     .clickable { onSelectSubTab(PlaylistSubTab.MY_PLAYLISTS) }
                     .padding(vertical = 10.dp)
@@ -623,13 +610,13 @@ private fun PlaylistsTabContent(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.QueueMusic,
                         contentDescription = null,
-                        tint = if (selectedSubTab == PlaylistSubTab.MY_PLAYLISTS) Color.White else VybeTextSecondary,
+                        tint = if (selectedSubTab == PlaylistSubTab.MY_PLAYLISTS) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "My Playlist (${myPlaylists.size})",
-                        color = if (selectedSubTab == PlaylistSubTab.MY_PLAYLISTS) Color.White else VybeTextSecondary,
+                        color = if (selectedSubTab == PlaylistSubTab.MY_PLAYLISTS) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -642,7 +629,7 @@ private fun PlaylistsTabContent(
                     .weight(1f)
                     .clip(RoundedCornerShape(14.dp))
                     .background(
-                        if (selectedSubTab == PlaylistSubTab.LIKED_PLAYLISTS) VybeOrange else VybeSurfaceVariant
+                        if (selectedSubTab == PlaylistSubTab.LIKED_PLAYLISTS) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
                     )
                     .clickable { onSelectSubTab(PlaylistSubTab.LIKED_PLAYLISTS) }
                     .padding(vertical = 10.dp)
@@ -653,13 +640,13 @@ private fun PlaylistsTabContent(
                     Icon(
                         imageVector = Icons.Default.Favorite,
                         contentDescription = null,
-                        tint = if (selectedSubTab == PlaylistSubTab.LIKED_PLAYLISTS) Color.White else VybeTextSecondary,
+                        tint = if (selectedSubTab == PlaylistSubTab.LIKED_PLAYLISTS) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "Liked Playlist (${likedPlaylists.size})",
-                        color = if (selectedSubTab == PlaylistSubTab.LIKED_PLAYLISTS) Color.White else VybeTextSecondary,
+                        color = if (selectedSubTab == PlaylistSubTab.LIKED_PLAYLISTS) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -684,10 +671,10 @@ private fun PlaylistsTabContent(
                                 .clip(RoundedCornerShape(14.dp))
                                 .background(
                                     Brush.horizontalGradient(
-                                        listOf(VybeOrange.copy(alpha = 0.2f), VybePink.copy(alpha = 0.2f))
+                                        listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
                                     )
                                 )
-                                .border(1.dp, VybeOrange.copy(alpha = 0.5f), RoundedCornerShape(14.dp))
+                                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), RoundedCornerShape(14.dp))
                                 .clickable { onCreatePlaylist() }
                                 .padding(horizontal = 16.dp, vertical = 14.dp)
                                 .testTag("create_new_playlist_item"),
@@ -697,7 +684,7 @@ private fun PlaylistsTabContent(
                                 modifier = Modifier
                                     .size(44.dp)
                                     .clip(CircleShape)
-                                    .background(VybeOrange),
+                                    .background(MaterialTheme.colorScheme.primary),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(Icons.Default.Add, contentDescription = "Create", tint = Color.White, modifier = Modifier.size(24.dp))
@@ -706,13 +693,13 @@ private fun PlaylistsTabContent(
                             Column {
                                 Text(
                                     text = "Create Playlist",
-                                    color = VybeTextPrimary,
+                                    color = MaterialTheme.colorScheme.onSurface,
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
                                     text = "Build your own custom mix of songs",
-                                    color = VybeTextSecondary,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontSize = 12.sp
                                 )
                             }
@@ -731,20 +718,20 @@ private fun PlaylistsTabContent(
                                     Icon(
                                         imageVector = Icons.Default.PlaylistAdd,
                                         contentDescription = null,
-                                        tint = VybeTextMuted,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.size(48.dp)
                                     )
                                     Spacer(modifier = Modifier.height(12.dp))
                                     Text(
                                         text = "No custom playlists yet",
-                                        color = VybeTextPrimary,
+                                        color = MaterialTheme.colorScheme.onSurface,
                                         fontSize = 16.sp,
                                         fontWeight = FontWeight.Bold
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
                                         text = "Tap 'Create Playlist' above to create your first personal playlist!",
-                                        color = VybeTextMuted,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         fontSize = 12.sp,
                                         textAlign = TextAlign.Center
                                     )
@@ -760,7 +747,7 @@ private fun PlaylistsTabContent(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(14.dp))
-                                    .background(VybeSurfaceVariant)
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
                                     .clickable { onOpenUserPlaylist(playlist) }
                                     .padding(12.dp)
                                     .testTag("user_playlist_${playlist.id}"),
@@ -771,7 +758,7 @@ private fun PlaylistsTabContent(
                                         .size(54.dp)
                                         .clip(RoundedCornerShape(10.dp))
                                         .background(
-                                            Brush.linearGradient(listOf(VybeOrange, VybePink))
+                                            Brush.linearGradient(listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary))
                                         ),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -788,7 +775,7 @@ private fun PlaylistsTabContent(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = playlist.title,
-                                        color = VybeTextPrimary,
+                                        color = MaterialTheme.colorScheme.onSurface,
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.SemiBold,
                                         maxLines = 1,
@@ -797,7 +784,7 @@ private fun PlaylistsTabContent(
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
                                         text = if (playlist.description.isNotBlank()) playlist.description else "Custom Playlist",
-                                        color = VybeTextSecondary,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         fontSize = 12.sp,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
@@ -811,7 +798,7 @@ private fun PlaylistsTabContent(
                                     Icon(
                                         imageVector = Icons.Default.Delete,
                                         contentDescription = "Delete",
-                                        tint = VybeTextMuted,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.size(18.dp)
                                     )
                                 }
@@ -833,20 +820,20 @@ private fun PlaylistsTabContent(
                             Icon(
                                 imageVector = Icons.Default.FavoriteBorder,
                                 contentDescription = null,
-                                tint = VybeTextMuted,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(48.dp)
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             Text(
                                 text = "No liked playlists yet",
-                                color = VybeTextPrimary,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
                                 text = "Browse playlists from Home or Search, and tap the heart icon to save them to your library.",
-                                color = VybeTextMuted,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 13.sp,
                                 textAlign = TextAlign.Center
                             )
@@ -866,7 +853,7 @@ private fun PlaylistsTabContent(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(14.dp))
-                                    .background(VybeSurfaceVariant)
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
                                     .clickable { onOpenLikedPlaylist(playlist) }
                                     .padding(12.dp)
                                     .testTag("liked_playlist_${playlist.id}"),
@@ -876,7 +863,7 @@ private fun PlaylistsTabContent(
                                     modifier = Modifier
                                         .size(54.dp)
                                         .clip(RoundedCornerShape(10.dp))
-                                        .background(VybeSurface)
+                                        .background(MaterialTheme.colorScheme.surface)
                                 ) {
                                     AsyncImage(
                                         model = ImageRequest.Builder(context)
@@ -894,7 +881,7 @@ private fun PlaylistsTabContent(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = playlist.title,
-                                        color = VybeTextPrimary,
+                                        color = MaterialTheme.colorScheme.onSurface,
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.SemiBold,
                                         maxLines = 1,
@@ -903,7 +890,7 @@ private fun PlaylistsTabContent(
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
                                         text = playlist.subtitle.ifBlank { "Liked Playlist" },
-                                        color = VybeTextSecondary,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         fontSize = 12.sp,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
@@ -959,20 +946,20 @@ private fun PlaylistsTabContent(
                 Icon(
                     imageVector = Icons.Default.FavoriteBorder,
                     contentDescription = null,
-                    tint = VybePink,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(56.dp)
                 )
                 Spacer(modifier = Modifier.height(14.dp))
                 Text(
                     text = "No liked songs yet",
-                    color = VybeTextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = "Tap the heart icon on any song to save your personal favorites here.",
-                    color = VybeTextMuted,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 13.sp,
                     textAlign = TextAlign.Center
                 )
@@ -1004,7 +991,7 @@ private fun PlaylistsTabContent(
                             .height(44.dp)
                             .clip(RoundedCornerShape(20.dp))
                             .background(
-                                Brush.horizontalGradient(listOf(VybePink, VybeOrange))
+                                Brush.horizontalGradient(listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary))
                             )
                             .testTag("liked_songs_play_all")
                     ) {
@@ -1024,9 +1011,9 @@ private fun PlaylistsTabContent(
                             .testTag("liked_songs_shuffle")
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Shuffle, contentDescription = null, tint = VybeOrange, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.Shuffle, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Shuffle", color = VybeOrange, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                            Text("Shuffle", color = MaterialTheme.colorScheme.primary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -1044,7 +1031,7 @@ private fun PlaylistsTabContent(
                         .clickable { onPlaySong(song) }
                         .padding(vertical = 6.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(VybeSurfaceVariant.copy(alpha = 0.5f))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                         .padding(horizontal = 12.dp, vertical = 8.dp)
                         .testTag("liked_song_item_${song.id}"),
                     verticalAlignment = Alignment.CenterVertically
@@ -1053,7 +1040,7 @@ private fun PlaylistsTabContent(
                         modifier = Modifier
                             .size(46.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .background(VybeSurfaceVariant)
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
                     ) {
                         AsyncImage(
                             model = ImageRequest.Builder(context)
@@ -1071,7 +1058,7 @@ private fun PlaylistsTabContent(
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = song.title,
-                            color = if (isCurrent) VybeOrange else VybeTextPrimary,
+                            color = if (isCurrent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
                             maxLines = 1,
@@ -1080,7 +1067,7 @@ private fun PlaylistsTabContent(
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
                             text = song.artist,
-                            color = VybeTextSecondary,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 12.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -1089,7 +1076,7 @@ private fun PlaylistsTabContent(
 
                     Text(
                         text = MusicUtils.formatDuration(song.durationSeconds),
-                        color = VybeTextMuted,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 11.sp
                     )
 
@@ -1134,20 +1121,20 @@ private fun LikedAlbumsContent(
                 Icon(
                     imageVector = Icons.Default.Album,
                     contentDescription = null,
-                    tint = VybePurple,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(56.dp)
                 )
                 Spacer(modifier = Modifier.height(14.dp))
                 Text(
                     text = "No liked albums yet",
-                    color = VybeTextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = "When you like an album from Home or Search, it will appear here in your collection.",
-                    color = VybeTextMuted,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 13.sp,
                     textAlign = TextAlign.Center
                 )
@@ -1167,7 +1154,7 @@ private fun LikedAlbumsContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(14.dp))
-                        .background(VybeSurfaceVariant)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
                         .clickable { onOpenAlbum(album) }
                         .padding(12.dp)
                         .testTag("liked_album_${album.id}"),
@@ -1177,7 +1164,7 @@ private fun LikedAlbumsContent(
                         modifier = Modifier
                             .size(56.dp)
                             .clip(RoundedCornerShape(10.dp))
-                            .background(VybeSurface)
+                            .background(MaterialTheme.colorScheme.surface)
                     ) {
                         AsyncImage(
                             model = ImageRequest.Builder(context)
@@ -1195,7 +1182,7 @@ private fun LikedAlbumsContent(
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = album.title,
-                            color = VybeTextPrimary,
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold,
                             maxLines = 1,
@@ -1204,7 +1191,7 @@ private fun LikedAlbumsContent(
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
                             text = "${album.artist} • ${if (album.year.isNotBlank()) album.year else "Album"}",
-                            color = VybeTextSecondary,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 12.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -1256,20 +1243,20 @@ private fun DownloadsContent(
                 Icon(
                     imageVector = Icons.Default.DownloadDone,
                     contentDescription = null,
-                    tint = VybeElectricCyan,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(56.dp)
                 )
                 Spacer(modifier = Modifier.height(14.dp))
                 Text(
                     text = "No offline downloads yet",
-                    color = VybeTextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = "Download songs from the player options to listen offline without internet connection.",
-                    color = VybeTextMuted,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 13.sp,
                     textAlign = TextAlign.Center
                 )
@@ -1289,11 +1276,11 @@ private fun DownloadsContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.DownloadDone, contentDescription = null, tint = VybeElectricCyan, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.DownloadDone, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = "Offline Storage: $storageSizeString",
-                                color = VybeTextSecondary,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium
                             )
@@ -1301,7 +1288,7 @@ private fun DownloadsContent(
 
                         Text(
                             text = "Clear All",
-                            color = VybeCoral,
+                            color = MaterialTheme.colorScheme.primary,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
@@ -1330,7 +1317,7 @@ private fun DownloadsContent(
                                 .height(44.dp)
                                 .clip(RoundedCornerShape(20.dp))
                                 .background(
-                                    Brush.horizontalGradient(listOf(VybeElectricCyan, Color(0xFF10B981)))
+                                    Brush.horizontalGradient(listOf(MaterialTheme.colorScheme.primary, Color(0xFF10B981)))
                                 )
                                 .testTag("downloads_play_all")
                         ) {
@@ -1350,9 +1337,9 @@ private fun DownloadsContent(
                                 .testTag("downloads_shuffle")
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.Shuffle, contentDescription = null, tint = VybeElectricCyan, modifier = Modifier.size(18.dp))
+                                Icon(Icons.Default.Shuffle, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Shuffle", color = VybeElectricCyan, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                                Text("Shuffle", color = MaterialTheme.colorScheme.primary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
@@ -1371,7 +1358,7 @@ private fun DownloadsContent(
                         .clickable { onPlaySong(song) }
                         .padding(vertical = 6.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(VybeSurfaceVariant.copy(alpha = 0.5f))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                         .padding(horizontal = 12.dp, vertical = 8.dp)
                         .testTag("downloaded_song_item_${song.id}"),
                     verticalAlignment = Alignment.CenterVertically
@@ -1380,7 +1367,7 @@ private fun DownloadsContent(
                         modifier = Modifier
                             .size(46.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .background(VybeSurfaceVariant)
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
                     ) {
                         AsyncImage(
                             model = ImageRequest.Builder(context)
@@ -1399,7 +1386,7 @@ private fun DownloadsContent(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = song.title,
-                                color = if (isCurrent) VybeOrange else VybeTextPrimary,
+                                color = if (isCurrent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 maxLines = 1,
@@ -1409,7 +1396,7 @@ private fun DownloadsContent(
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
                             text = song.artist,
-                            color = VybeTextSecondary,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 12.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -1419,7 +1406,7 @@ private fun DownloadsContent(
                     Icon(
                         imageVector = Icons.Default.DownloadDone,
                         contentDescription = "Downloaded",
-                        tint = VybeElectricCyan,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(18.dp)
                     )
 
@@ -1432,7 +1419,7 @@ private fun DownloadsContent(
                         Icon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = "Remove download",
-                            tint = VybeTextMuted,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(18.dp)
                         )
                     }

@@ -1,11 +1,11 @@
 package com.example.ui.components
 
+import androidx.compose.material3.MaterialTheme
 import android.content.Context
 import android.content.Intent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,17 +19,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ui.theme.VybeBorder
 import com.example.R
-import com.example.ui.theme.VybeTextPrimary
 
 import androidx.compose.foundation.layout.statusBarsPadding
 import com.example.ui.theme.OutfitFontFamily
@@ -54,18 +51,19 @@ fun TopHeader(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.vybe_logo),
+                painter = painterResource(id = R.drawable.ic_vybe_note),
                 contentDescription = "VYBE logo",
-                modifier = Modifier.size(34.dp)
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.size(48.dp)
             )
 
             Text(
                 text = "VYBE",
-                color = VybeTextPrimary,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 25.sp,
-                fontWeight = FontWeight.ExtraBold,
+                fontWeight = FontWeight.Bold,
                 fontFamily = OutfitFontFamily,
-                letterSpacing = 1.2.sp
+                letterSpacing = 0.sp
             )
         }
 
@@ -74,13 +72,13 @@ fun TopHeader(
             onClick = { shareVybeApp(context) },
             modifier = Modifier
                 .size(40.dp)
-                .background(Color(0x22FFFFFF), CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.75f), CircleShape)
                 .testTag("share_button")
         ) {
             Icon(
                 imageVector = Icons.Outlined.Share,
                 contentDescription = "Share VYBE",
-                tint = Color.White,
+                tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(20.dp)
             )
         }

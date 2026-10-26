@@ -34,14 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.theme.OutfitFontFamily
-import com.example.ui.theme.VybeBorder
-import com.example.ui.theme.VybeOrange
-import com.example.ui.theme.VybePink
-import com.example.ui.theme.VybeSurface
-import com.example.ui.theme.VybeSurfaceVariant
-import com.example.ui.theme.VybeTextMuted
-import com.example.ui.theme.VybeTextPrimary
-import com.example.ui.theme.VybeTextSecondary
 
 @Composable
 fun SettingsSectionHeader(

@@ -1,5 +1,6 @@
 package com.example.ui.search
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -65,15 +66,6 @@ import com.example.player.PlayerManager
 import com.example.ui.components.CollectionDetailSheet
 import com.example.ui.home.CollectionDetailState
 import com.example.ui.components.EqualizerWaveformIndicator
-import com.example.ui.theme.VybeBlack
-import com.example.ui.theme.VybeBorder
-import com.example.ui.theme.VybeOrange
-import com.example.ui.theme.VybePink
-import com.example.ui.theme.VybeSurface
-import com.example.ui.theme.VybeSurfaceVariant
-import com.example.ui.theme.VybeTextMuted
-import com.example.ui.theme.VybeTextPrimary
-import com.example.ui.theme.VybeTextSecondary
 import com.example.util.MusicUtils
 
 @Composable
@@ -92,7 +84,7 @@ fun SearchScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(VybeBlack)
+            .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
             .testTag("search_screen")
     ) {
@@ -218,12 +210,12 @@ private fun SearchHeaderBar(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(VybeBlack)
+            .background(MaterialTheme.colorScheme.background)
             .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 12.dp)
     ) {
         Text(
             text = "Search",
-            color = VybeTextPrimary,
+            color = MaterialTheme.colorScheme.onSurface,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 12.dp)
@@ -242,7 +234,7 @@ private fun SearchHeaderBar(
                 placeholder = {
                     Text(
                         text = "Search songs, artists...",
-                        color = VybeTextMuted,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 14.sp
                     )
                 },
@@ -250,7 +242,7 @@ private fun SearchHeaderBar(
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search Icon",
-                        tint = if (query.isNotBlank()) VybeOrange else VybeTextMuted,
+                        tint = if (query.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp)
                     )
                 },
@@ -265,7 +257,7 @@ private fun SearchHeaderBar(
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "Clear search",
-                                tint = VybeTextMuted,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(18.dp)
                             )
                         }
@@ -274,14 +266,14 @@ private fun SearchHeaderBar(
                 singleLine = true,
                 shape = RoundedCornerShape(24.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = VybeSurfaceVariant,
-                    unfocusedContainerColor = VybeSurface,
-                    disabledContainerColor = VybeSurface,
-                    focusedTextColor = VybeTextPrimary,
-                    unfocusedTextColor = VybeTextPrimary,
-                    focusedBorderColor = VybeOrange,
-                    unfocusedBorderColor = VybeBorder,
-                    cursorColor = VybeOrange
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    disabledContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    cursorColor = MaterialTheme.colorScheme.primary
                 ),
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Search
@@ -301,7 +293,7 @@ private fun SearchHeaderBar(
                     .clip(CircleShape)
                     .background(
                         Brush.linearGradient(
-                            listOf(VybeOrange, VybePink)
+                            listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary)
                         )
                     )
                     .testTag("search_submit_button")
@@ -339,27 +331,27 @@ private fun SearchHistoryContent(
                     modifier = Modifier
                         .size(80.dp)
                         .clip(CircleShape)
-                        .background(VybeSurfaceVariant),
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.MusicNote,
                         contentDescription = null,
-                        tint = VybeOrange,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(40.dp)
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Search For Music",
-                    color = VybeTextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Type a song or artist name and press Enter to search.",
-                    color = VybeTextMuted,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 13.sp,
                     textAlign = TextAlign.Center
                 )
@@ -382,7 +374,7 @@ private fun SearchHistoryContent(
                 ) {
                     Text(
                         text = "RECENT SEARCHES (${history.size}/10)",
-                        color = VybeTextMuted,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp
@@ -394,13 +386,13 @@ private fun SearchHistoryContent(
                         Icon(
                             imageVector = Icons.Outlined.DeleteOutline,
                             contentDescription = "Clear all searches",
-                            tint = VybePink,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "Clear All",
-                            color = VybePink,
+                            color = MaterialTheme.colorScheme.primary,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -429,13 +421,13 @@ private fun SearchHistoryContent(
                         Icon(
                             imageVector = Icons.Default.History,
                             contentDescription = "Recent search",
-                            tint = VybeOrange,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(14.dp))
                         Text(
                             text = queryItem,
-                            color = VybeTextPrimary,
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Medium,
                             maxLines = 1,
@@ -453,7 +445,7 @@ private fun SearchHistoryContent(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Delete search $queryItem",
-                            tint = VybeTextMuted,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -485,7 +477,7 @@ private fun SearchResultsContent(
             item(key = "collections_header") {
                 Text(
                     text = "ALBUMS & PLAYLISTS",
-                    color = VybeTextMuted,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp,
@@ -528,14 +520,14 @@ private fun SearchResultsContent(
                 Column {
                     Text(
                         text = "SONGS FOUND (${songs.size})",
-                        color = VybeTextMuted,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp
                     )
                     Text(
                         text = "for \"$query\"",
-                        color = VybeTextSecondary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 13.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -546,7 +538,7 @@ private fun SearchResultsContent(
                     onClick = onPlayAll,
                     shape = RoundedCornerShape(20.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = VybeOrange
+                        containerColor = MaterialTheme.colorScheme.primary
                     ),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                     modifier = Modifier.testTag("search_play_all")
@@ -605,7 +597,7 @@ private fun SearchCollectionCard(
                 .fillMaxWidth()
                 .height(92.dp)
                 .clip(RoundedCornerShape(10.dp))
-                .background(VybeSurfaceVariant)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
             if (collection.artworkUrl.isNotBlank()) {
                 AsyncImage(
@@ -618,7 +610,7 @@ private fun SearchCollectionCard(
                 Icon(
                     imageVector = Icons.Default.MusicNote,
                     contentDescription = null,
-                    tint = VybeOrange,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.align(Alignment.Center).size(28.dp)
                 )
             }
@@ -626,7 +618,7 @@ private fun SearchCollectionCard(
         Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = collection.title,
-            color = VybeTextPrimary,
+            color = MaterialTheme.colorScheme.onSurface,
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
             maxLines = 1,
@@ -634,7 +626,7 @@ private fun SearchCollectionCard(
         )
         Text(
             text = collection.subtitle,
-            color = VybeTextSecondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 11.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -665,7 +657,7 @@ private fun SearchSongRow(
             modifier = Modifier
                 .size(48.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(VybeSurfaceVariant),
+                .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
             if (song.artworkUrl.isNotBlank()) {
@@ -679,7 +671,7 @@ private fun SearchSongRow(
                 Icon(
                     imageVector = Icons.Default.MusicNote,
                     contentDescription = null,
-                    tint = VybeOrange,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -693,7 +685,7 @@ private fun SearchSongRow(
                 ) {
                     EqualizerWaveformIndicator(
                         modifier = Modifier.size(22.dp),
-                        color = VybeOrange
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }
@@ -707,7 +699,7 @@ private fun SearchSongRow(
         ) {
             Text(
                 text = song.title,
-                color = if (isCurrent) VybeOrange else VybeTextPrimary,
+                color = if (isCurrent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                 fontSize = 15.sp,
                 fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Medium,
                 maxLines = 1,
@@ -719,7 +711,7 @@ private fun SearchSongRow(
                     song.artist.ifBlank { null },
                     song.album.ifBlank { null }
                 ).joinToString(" • "),
-                color = VybeTextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -732,7 +724,7 @@ private fun SearchSongRow(
         if (song.durationSeconds > 0) {
             Text(
                 text = MusicUtils.formatDuration(song.durationSeconds),
-                color = VybeTextMuted,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -748,7 +740,7 @@ private fun SearchSongRow(
             Icon(
                 imageVector = if (song.isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                 contentDescription = "Toggle favorite",
-                tint = if (song.isLiked) Color.Red else VybeTextMuted,
+                tint = if (song.isLiked) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -768,14 +760,14 @@ private fun SearchLoadingContent(query: String) {
             verticalArrangement = Arrangement.Center
         ) {
             CircularProgressIndicator(
-                color = VybeOrange,
+                color = MaterialTheme.colorScheme.primary,
                 strokeWidth = 3.dp,
                 modifier = Modifier.size(44.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "Searching songs for \"$query\"...",
-                color = VybeTextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 14.sp
             )
         }
@@ -801,34 +793,34 @@ private fun SearchEmptyContent(
                 modifier = Modifier
                     .size(72.dp)
                     .clip(CircleShape)
-                    .background(VybeSurfaceVariant),
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.SearchOff,
                     contentDescription = null,
-                    tint = VybeTextMuted,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(36.dp)
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "No songs found",
-                color = VybeTextPrimary,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = "We couldn't find any songs matching \"$query\". Check for spelling or try searching another song or artist.",
-                color = VybeTextMuted,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 13.sp,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(20.dp))
             Text(
                 text = "Try searching:",
-                color = VybeTextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold
             )
@@ -840,13 +832,13 @@ private fun SearchEmptyContent(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(16.dp))
-                            .background(VybeSurfaceVariant)
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
                             .clickable { onSuggestionClick(suggestion) }
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Text(
                             text = suggestion,
-                            color = VybeOrange,
+                            color = MaterialTheme.colorScheme.primary,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Medium
                         )
@@ -874,21 +866,21 @@ private fun SearchErrorContent(
         ) {
             Text(
                 text = "Search Error",
-                color = VybeTextPrimary,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = message,
-                color = VybeTextMuted,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 13.sp,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(20.dp))
             Button(
                 onClick = onRetry,
-                colors = ButtonDefaults.buttonColors(containerColor = VybeOrange)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Icon(
                     imageVector = Icons.Default.Refresh,

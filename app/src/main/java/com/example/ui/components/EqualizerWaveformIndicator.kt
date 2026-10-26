@@ -1,5 +1,6 @@
 package com.example.ui.components
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -22,13 +23,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.example.ui.theme.VybeOrange
 
 @Composable
 fun EqualizerWaveformIndicator(
     modifier: Modifier = Modifier,
     isPlaying: Boolean = true,
-    color: Color = VybeOrange,
+    color: Color = MaterialTheme.colorScheme.primary,
     barWidth: Dp = 3.dp
 ) {
     val transition = rememberInfiniteTransition(label = "equalizer")

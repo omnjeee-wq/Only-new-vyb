@@ -1,5 +1,6 @@
 package com.example.ui.components
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
@@ -58,15 +59,9 @@ import coil.request.ImageRequest
 import androidx.compose.foundation.layout.navigationBarsPadding
 import com.example.player.PlayerState
 import com.example.ui.theme.OutfitFontFamily
-import com.example.ui.theme.VybeBorder
-import com.example.ui.theme.VybeCoral
-import com.example.ui.theme.VybeGlass
-import com.example.ui.theme.VybeOrange
-import com.example.ui.theme.VybeSurfaceVariant
-import com.example.ui.theme.VybeTextMuted
-import com.example.ui.theme.VybeTextPrimary
-import com.example.ui.theme.VybeTextSecondary
 import com.example.ui.theme.glowingBorder
+import com.example.ui.theme.neonGlow
+import com.example.ui.theme.pulsingGlow
 
 enum class NavDestination {
     HOME,
@@ -108,8 +103,8 @@ fun FloatingBottomBar(
                         .fillMaxWidth()
                         .padding(bottom = 10.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(VybeGlass)
-                        .border(1.dp, VybeBorder, RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.88f))
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
                         .clickable { onOpenFullPlayer() }
                         .testTag("mini_player")
                 ) {
@@ -125,7 +120,7 @@ fun FloatingBottomBar(
                                 modifier = Modifier
                                     .size(44.dp)
                                     .clip(RoundedCornerShape(10.dp))
-                                    .background(VybeSurfaceVariant)
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
                             ) {
                                 AsyncImage(
                                     model = ImageRequest.Builder(context)
@@ -146,7 +141,7 @@ fun FloatingBottomBar(
                             ) {
                                 Text(
                                     text = currentSong.title,
-                                    color = VybeTextPrimary,
+                                    color = MaterialTheme.colorScheme.onSurface,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     maxLines = 1,
@@ -155,7 +150,7 @@ fun FloatingBottomBar(
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = currentSong.artist,
-                                    color = VybeTextSecondary,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontSize = 11.sp,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
@@ -182,7 +177,7 @@ fun FloatingBottomBar(
                                 Icon(
                                     imageVector = Icons.Default.SkipNext,
                                     contentDescription = "Next",
-                                    tint = VybeTextSecondary,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(22.dp)
                                 )
                             }
@@ -198,7 +193,7 @@ fun FloatingBottomBar(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(2.dp),
-                            color = Color(0xFFB58AE8),
+                            color = MaterialTheme.colorScheme.primary,
                             trackColor = Color.Transparent
                         )
                     }
@@ -211,12 +206,13 @@ fun FloatingBottomBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(66.dp)
+                .neonGlow(color = MaterialTheme.colorScheme.primary, radius = 22.dp, alpha = 0.22f, cornerRadius = 33.dp)
                 .clip(RoundedCornerShape(33.dp))
-                .background(Color(0xF51D141F))
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.94f))
                 .glowingBorder(
-                    color = Color(0xFF403044),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f),
                     strokeWidth = 1.dp,
-                    glowRadius = 0.dp,
+                    glowRadius = 10.dp,
                     cornerRadius = 33.dp
                 )
                 .padding(horizontal = 8.dp),
@@ -249,13 +245,20 @@ fun FloatingBottomBar(
                 Box(
                     modifier = Modifier
                         .size(48.dp)
+                        .pulsingGlow(
+                            color = MaterialTheme.colorScheme.primary,
+                            minRadius = 6.dp,
+                            maxRadius = 16.dp,
+                            minAlpha = 0.35f,
+                            maxAlpha = 0.85f
+                        )
                         .clip(CircleShape)
                         .background(
                             Brush.linearGradient(
-                                listOf(Color(0xFFB58AE8), Color(0xFF9D75D0))
+                                listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary)
                             )
                         )
-                        .border(1.5.dp, Color.White.copy(alpha = 0.4f), CircleShape)
+                        .border(1.5.dp, MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.4f), CircleShape)
                         .clickable { onOpenFullPlayer() }
                         .testTag("center_player_button"),
                     contentAlignment = Alignment.Center
@@ -263,7 +266,7 @@ fun FloatingBottomBar(
                     EqualizerWaveformIndicator(
                         modifier = Modifier.size(22.dp),
                         isPlaying = playerState.isPlaying,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
 
@@ -300,7 +303,7 @@ private fun NavIconItem(
     Column(
         modifier = Modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(if (selected) Color(0x24B58AE8) else Color.Transparent)
+            .background(if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f) else Color.Transparent)
             .clickable { onClick() }
             .padding(horizontal = 12.dp, vertical = 6.dp)
             .testTag("nav_item_${label.lowercase()}"),
@@ -310,12 +313,12 @@ private fun NavIconItem(
         Icon(
             imageVector = if (selected) selectedIcon else unselectedIcon,
             contentDescription = label,
-            tint = if (selected) Color(0xFFB58AE8) else VybeTextMuted,
+            tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
                 .size(22.dp)
                 .then(
                     if (selected) {
-                        Modifier.then(Modifier)
+                        Modifier.neonGlow(color = MaterialTheme.colorScheme.primary, radius = 6.dp, alpha = 0.6f)
                     } else {
                         Modifier
                     }
@@ -324,7 +327,7 @@ private fun NavIconItem(
         Spacer(modifier = Modifier.height(2.dp))
         Text(
             text = label,
-            color = if (selected) Color(0xFFB58AE8) else VybeTextMuted,
+            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 10.sp,
             fontFamily = OutfitFontFamily,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
@@ -334,9 +337,9 @@ private fun NavIconItem(
             Box(
                 modifier = Modifier
                     .size(4.dp)
-                    .then(Modifier)
+                    .neonGlow(color = MaterialTheme.colorScheme.primary, radius = 4.dp, alpha = 0.8f)
                     .clip(CircleShape)
-                    .background(Color(0xFFB58AE8))
+                    .background(MaterialTheme.colorScheme.primary)
             )
         }
     }

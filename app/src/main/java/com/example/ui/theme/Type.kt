@@ -2,6 +2,7 @@ package com.example.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -24,28 +25,28 @@ val Typography = Typography(
         fontWeight = FontWeight.Bold,
         fontSize = 32.sp,
         letterSpacing = (-0.5).sp,
-        color = VybeTextPrimary
+        color = Color.Unspecified
     ),
     headlineMedium = TextStyle(
         fontFamily = OutfitFontFamily,
         fontWeight = FontWeight.SemiBold,
         fontSize = 20.sp,
         letterSpacing = (-0.2).sp,
-        color = VybeTextPrimary
+        color = Color.Unspecified
     ),
     titleLarge = TextStyle(
         fontFamily = OutfitFontFamily,
         fontWeight = FontWeight.SemiBold,
         fontSize = 18.sp,
         letterSpacing = 0.sp,
-        color = VybeTextPrimary
+        color = Color.Unspecified
     ),
     titleMedium = TextStyle(
         fontFamily = OutfitFontFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 15.sp,
         letterSpacing = 0.1.sp,
-        color = VybeTextPrimary
+        color = Color.Unspecified
     ),
     bodyLarge = TextStyle(
         fontFamily = OutfitFontFamily,
@@ -53,7 +54,7 @@ val Typography = Typography(
         fontSize = 14.sp,
         lineHeight = 20.sp,
         letterSpacing = 0.2.sp,
-        color = VybeTextPrimary
+        color = Color.Unspecified
     ),
     bodyMedium = TextStyle(
         fontFamily = OutfitFontFamily,
@@ -61,14 +62,14 @@ val Typography = Typography(
         fontSize = 13.sp,
         lineHeight = 18.sp,
         letterSpacing = 0.2.sp,
-        color = VybeTextSecondary
+        color = Color.Unspecified
     ),
     labelSmall = TextStyle(
         fontFamily = OutfitFontFamily,
         fontWeight = FontWeight.SemiBold,
         fontSize = 11.sp,
         letterSpacing = 1.2.sp,
-        color = VybeTextMuted
+        color = Color.Unspecified
     )
 )
 

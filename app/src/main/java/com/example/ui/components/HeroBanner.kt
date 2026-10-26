@@ -1,5 +1,6 @@
 package com.example.ui.components
 
+import androidx.compose.material3.MaterialTheme
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.BitmapDrawable
@@ -74,8 +75,6 @@ import com.example.R
 import com.example.domain.model.Song
 import com.example.ui.theme.OutfitFontFamily
 import com.example.ui.theme.PlayfairFontFamily
-import com.example.ui.theme.VybeBlack
-import com.example.ui.theme.VybeElectricCyan
 import com.example.ui.theme.neonGlow
 import com.example.ui.theme.pulsingGlow
 import kotlinx.coroutines.Dispatchers
@@ -90,10 +89,13 @@ private val GreatVibesFontFamily = FontFamily(
 )
 
 private val VibrantThemePalette = listOf(
-    Color(0xFFB58AE8), // VYBE lavender
-    Color(0xFFD58A9A), // muted rose
-    Color(0xFFB98578), // warm dusk
-    Color(0xFF8F789F)  // soft plum
+    Color(0xFFFF6436),
+    Color(0xFFFF2A85),
+    Color(0xFF00E5FF),
+    Color(0xFFA855F7),
+    Color(0xFFFFB800),
+    Color(0xFF10B981),
+    Color(0xFFFF3366)
 )
 
 @Composable
@@ -311,7 +313,7 @@ fun HeroBanner(
                                 Brush.radialGradient(
                                     colors = listOf(
                                         Color(0xFF26182B),
-                                        VybeBlack
+                                        MaterialTheme.colorScheme.background
                                     ),
                                     radius = 700f
                                 )
@@ -417,7 +419,7 @@ fun HeroBanner(
                             )
                             .border(
                                 1.5.dp,
-                                themeColor.copy(alpha = 0.16f),
+                                themeColor.copy(alpha = 0.65f),
                                 CircleShape
                             )
                     ) {
@@ -479,7 +481,7 @@ fun HeroBanner(
                                 .align(Alignment.Center)
                                 .size(centerHoleSize)
                                 .clip(CircleShape)
-                                .background(Color.Black.copy(alpha = 0.28f))
+                                .background(Color.Black.copy(alpha = 0.65f))
                                 .border(
                                     1.dp,
                                     Color.White.copy(alpha = 0.25f),
@@ -529,7 +531,7 @@ fun HeroBanner(
                                     .background(
                                         Brush.linearGradient(
                                             listOf(
-                                                VybeElectricCyan,
+                                                MaterialTheme.colorScheme.primary,
                                                 themeColor
                                             )
                                         ),

@@ -1,5 +1,6 @@
 package com.example.ui.components
 
+import androidx.compose.material3.MaterialTheme
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -29,7 +30,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.update.AnnouncementBannerConfig
-import com.example.ui.theme.VybeOrange
 
 @Composable
 fun AnnouncementBanner(
@@ -41,7 +41,7 @@ fun AnnouncementBanner(
     val bannerColor = when (banner.type.lowercase()) {
         "warning" -> Color(0xFFFF9800)
         "promo" -> Color(0xFF9C27B0)
-        else -> VybeOrange
+        else -> MaterialTheme.colorScheme.primary
     }
 
     Surface(

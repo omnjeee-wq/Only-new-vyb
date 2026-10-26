@@ -1,5 +1,6 @@
 package com.example.ui.navigation
 
+import androidx.compose.material3.MaterialTheme
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -40,7 +41,6 @@ import com.example.ui.search.SearchScreen
 import com.example.ui.search.SearchViewModel
 import com.example.ui.settings.SettingsScreen
 import com.example.ui.settings.SettingsViewModel
-import com.example.ui.theme.VybeBlack
 import com.example.util.NetworkMonitor
 import kotlinx.coroutines.launch
 
@@ -109,7 +109,7 @@ fun MainAppScaffold(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(VybeBlack)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // Active Destination Content with cinematic smooth cross-fade animation
         AnimatedContent(

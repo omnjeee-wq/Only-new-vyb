@@ -58,7 +58,7 @@ fun Modifier.neonGlow(
             this.style = PaintingStyle.Fill
             this.asFrameworkPaint().apply {
                 isAntiAlias = true
-                maskFilter = BlurMaskFilter(radius.toPx(), BlurMaskFilter.Blur.NORMAL)
+                maskFilter = BlurMaskFilter(radius.toPx().let { if (it.isFinite() && it > 0f) it.coerceAtMost(80f) else 1f }, BlurMaskFilter.Blur.NORMAL)
             }
         }
         if (cornerRadius <= 0.dp) {
@@ -166,14 +166,7 @@ fun Modifier.glowingBorder(
             this.strokeWidth = strokePx * 2.5f
             this.asFrameworkPaint().apply {
                 isAntiAlias = true
-                // Guard against invalid blur radii on devices where density/size
-                // calculations can produce zero or a non-finite value.
-                val safeBlurRadius = glowRadius.toPx().let { radius ->
-                    if (radius.isFinite() && radius > 0f) radius else 1f
-                }
-                maskFilter = runCatching {
-                    BlurMaskFilter(safeBlurRadius, BlurMaskFilter.Blur.NORMAL)
-                }.getOrNull()
+                maskFilter = BlurMaskFilter(glowRadius.toPx().let { if (it.isFinite() && it > 0f) it.coerceAtMost(80f) else 1f }, BlurMaskFilter.Blur.NORMAL)
             }
         }
         canvas.drawRoundRect(

@@ -1,5 +1,6 @@
 package com.example.ui.library
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -52,14 +53,6 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.domain.model.Playlist
 import com.example.domain.model.Song
-import com.example.ui.theme.VybeBorder
-import com.example.ui.theme.VybeElectricCyan
-import com.example.ui.theme.VybeOrange
-import com.example.ui.theme.VybeSurface
-import com.example.ui.theme.VybeSurfaceVariant
-import com.example.ui.theme.VybeTextMuted
-import com.example.ui.theme.VybeTextPrimary
-import com.example.ui.theme.VybeTextSecondary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,14 +72,14 @@ fun AddSongsToPlaylistSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = VybeSurface,
+        containerColor = MaterialTheme.colorScheme.surface,
         dragHandle = null,
         modifier = Modifier.fillMaxHeight(0.9f)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(VybeSurface)
+                .background(MaterialTheme.colorScheme.surface)
                 .testTag("add_songs_sheet")
         ) {
             // Header
@@ -100,20 +93,20 @@ fun AddSongsToPlaylistSheet(
                 Column {
                     Text(
                         text = "Add Songs to Playlist",
-                        color = VybeTextPrimary,
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = playlist.title,
-                        color = VybeOrange,
+                        color = MaterialTheme.colorScheme.primary,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Medium
                     )
                 }
 
                 IconButton(onClick = onDismiss) {
-                    Icon(Icons.Default.Close, contentDescription = "Close", tint = VybeTextSecondary)
+                    Icon(Icons.Default.Close, contentDescription = "Close", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
@@ -124,9 +117,9 @@ fun AddSongsToPlaylistSheet(
                     query = it
                     onSearch(it)
                 },
-                placeholder = { Text("Search songs to add...", color = VybeTextMuted) },
+                placeholder = { Text("Search songs to add...", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                 leadingIcon = {
-                    Icon(Icons.Default.Search, contentDescription = null, tint = VybeTextMuted)
+                    Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 },
                 trailingIcon = {
                     if (query.isNotEmpty()) {
@@ -134,19 +127,19 @@ fun AddSongsToPlaylistSheet(
                             query = ""
                             onSearch("")
                         }) {
-                            Icon(Icons.Default.Close, contentDescription = "Clear", tint = VybeTextMuted)
+                            Icon(Icons.Default.Close, contentDescription = "Clear", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 },
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = VybeOrange,
-                    unfocusedBorderColor = VybeBorder,
-                    focusedTextColor = VybeTextPrimary,
-                    unfocusedTextColor = VybeTextPrimary,
-                    cursorColor = VybeOrange,
-                    focusedContainerColor = VybeSurfaceVariant,
-                    unfocusedContainerColor = VybeSurfaceVariant
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    cursorColor = MaterialTheme.colorScheme.primary,
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
                 ),
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
@@ -162,7 +155,7 @@ fun AddSongsToPlaylistSheet(
                         .padding(32.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = VybeOrange, modifier = Modifier.size(32.dp))
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
                 }
             } else if (candidateSongs.isEmpty()) {
                 Box(
@@ -173,7 +166,7 @@ fun AddSongsToPlaylistSheet(
                 ) {
                     Text(
                         text = if (query.isBlank()) "No liked songs to add. Search above to find songs!" else "No songs found for '$query'",
-                        color = VybeTextMuted,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 14.sp
                     )
                 }
@@ -193,7 +186,7 @@ fun AddSongsToPlaylistSheet(
                                 .fillMaxWidth()
                                 .padding(vertical = 6.dp)
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(VybeSurfaceVariant.copy(alpha = 0.5f))
+                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                                 .padding(horizontal = 12.dp, vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -201,7 +194,7 @@ fun AddSongsToPlaylistSheet(
                                 modifier = Modifier
                                     .size(48.dp)
                                     .clip(RoundedCornerShape(8.dp))
-                                    .background(VybeSurfaceVariant)
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
                             ) {
                                 AsyncImage(
                                     model = ImageRequest.Builder(context)
@@ -219,7 +212,7 @@ fun AddSongsToPlaylistSheet(
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = song.title,
-                                    color = VybeTextPrimary,
+                                    color = MaterialTheme.colorScheme.onSurface,
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     maxLines = 1,
@@ -227,7 +220,7 @@ fun AddSongsToPlaylistSheet(
                                 )
                                 Text(
                                     text = song.artist,
-                                    color = VybeTextSecondary,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontSize = 12.sp,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
@@ -241,13 +234,13 @@ fun AddSongsToPlaylistSheet(
                                     modifier = Modifier
                                         .size(36.dp)
                                         .clip(RoundedCornerShape(18.dp))
-                                        .background(VybeElectricCyan.copy(alpha = 0.2f)),
+                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Check,
                                         contentDescription = "Added",
-                                        tint = VybeElectricCyan,
+                                        tint = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.size(20.dp)
                                     )
                                 }
@@ -257,13 +250,13 @@ fun AddSongsToPlaylistSheet(
                                     modifier = Modifier
                                         .size(36.dp)
                                         .clip(RoundedCornerShape(18.dp))
-                                        .background(VybeOrange.copy(alpha = 0.2f))
+                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
                                         .testTag("add_song_btn_${song.id}")
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Add,
                                         contentDescription = "Add to playlist",
-                                        tint = VybeOrange,
+                                        tint = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.size(20.dp)
                                     )
                                 }

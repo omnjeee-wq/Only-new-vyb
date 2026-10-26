@@ -1,5 +1,6 @@
 package com.example.ui.library
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,14 +36,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.example.ui.theme.VybeBorder
-import com.example.ui.theme.VybeOrange
-import com.example.ui.theme.VybePink
-import com.example.ui.theme.VybeSurface
-import com.example.ui.theme.VybeSurfaceVariant
-import com.example.ui.theme.VybeTextMuted
-import com.example.ui.theme.VybeTextPrimary
-import com.example.ui.theme.VybeTextSecondary
 
 @Composable
 fun CreatePlaylistDialog(
@@ -58,7 +51,7 @@ fun CreatePlaylistDialog(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(24.dp))
                 .testTag("create_playlist_dialog"),
-            color = VybeSurface,
+            color = MaterialTheme.colorScheme.surface,
             tonalElevation = 8.dp
         ) {
             Column(
@@ -72,13 +65,13 @@ fun CreatePlaylistDialog(
                     Icon(
                         imageVector = Icons.Default.PlaylistAdd,
                         contentDescription = null,
-                        tint = VybeOrange,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(28.dp)
                     )
                     Spacer(modifier = Modifier.size(10.dp))
                     Text(
                         text = "Create Playlist",
-                        color = VybeTextPrimary,
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -93,15 +86,15 @@ fun CreatePlaylistDialog(
                     placeholder = { Text("e.g. My Favorites, Late Night Vybes") },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = VybeOrange,
-                        unfocusedBorderColor = VybeBorder,
-                        focusedTextColor = VybeTextPrimary,
-                        unfocusedTextColor = VybeTextPrimary,
-                        focusedLabelColor = VybeOrange,
-                        unfocusedLabelColor = VybeTextMuted,
-                        cursorColor = VybeOrange,
-                        focusedContainerColor = VybeSurfaceVariant,
-                        unfocusedContainerColor = VybeSurfaceVariant
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        focusedLabelColor = MaterialTheme.colorScheme.primary,
+                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        cursorColor = MaterialTheme.colorScheme.primary,
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
                     ),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
@@ -119,15 +112,15 @@ fun CreatePlaylistDialog(
                     singleLine = false,
                     maxLines = 3,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = VybeOrange,
-                        unfocusedBorderColor = VybeBorder,
-                        focusedTextColor = VybeTextPrimary,
-                        unfocusedTextColor = VybeTextPrimary,
-                        focusedLabelColor = VybeOrange,
-                        unfocusedLabelColor = VybeTextMuted,
-                        cursorColor = VybeOrange,
-                        focusedContainerColor = VybeSurfaceVariant,
-                        unfocusedContainerColor = VybeSurfaceVariant
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        focusedLabelColor = MaterialTheme.colorScheme.primary,
+                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        cursorColor = MaterialTheme.colorScheme.primary,
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
                     ),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
@@ -146,7 +139,7 @@ fun CreatePlaylistDialog(
                         onClick = onDismiss,
                         modifier = Modifier.testTag("cancel_playlist_button")
                     ) {
-                        Text("Cancel", color = VybeTextSecondary, fontWeight = FontWeight.SemiBold)
+                        Text("Cancel", color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.SemiBold)
                     }
 
                     Spacer(modifier = Modifier.size(8.dp))
@@ -160,8 +153,8 @@ fun CreatePlaylistDialog(
                         enabled = title.isNotBlank(),
                         shape = RoundedCornerShape(20.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = VybeOrange,
-                            disabledContainerColor = VybeSurfaceVariant
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
                         ),
                         modifier = Modifier.testTag("confirm_create_playlist_button")
                     ) {

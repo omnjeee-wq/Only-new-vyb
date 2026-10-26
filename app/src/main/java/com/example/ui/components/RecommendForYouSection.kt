@@ -1,5 +1,6 @@
 package com.example.ui.components
 
+import androidx.compose.material3.MaterialTheme
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.background
@@ -52,14 +53,6 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.domain.model.Song
 import com.example.ui.theme.OutfitFontFamily
-import com.example.ui.theme.VybeBorder
-import com.example.ui.theme.VybeCoral
-import com.example.ui.theme.VybeOrange
-import com.example.ui.theme.VybeSurface
-import com.example.ui.theme.VybeSurfaceVariant
-import com.example.ui.theme.VybeTextMuted
-import com.example.ui.theme.VybeTextPrimary
-import com.example.ui.theme.VybeTextSecondary
 
 @Composable
 fun RecommendForYouSection(
@@ -99,11 +92,11 @@ fun RecommendForYouSection(
                         .width(3.dp)
                         .height(18.dp)
                         .clip(RoundedCornerShape(2.dp))
-                        .background(VybeOrange)
+                        .background(MaterialTheme.colorScheme.primary)
                 )
                 Text(
                     text = "Recommend For You",
-                    color = VybeTextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 18.sp,
                     fontFamily = OutfitFontFamily,
                     fontWeight = FontWeight.Bold,
@@ -122,7 +115,7 @@ fun RecommendForYouSection(
             ) {
                 Text(
                     text = "View All",
-                    color = VybeOrange,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 13.sp,
                     fontFamily = OutfitFontFamily,
                     fontWeight = FontWeight.SemiBold
@@ -130,7 +123,7 @@ fun RecommendForYouSection(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
                     contentDescription = null,
-                    tint = VybeOrange,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(11.dp)
                 )
             }
@@ -183,10 +176,10 @@ private fun RecommendSongItem(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(if (isCurrent) Color(0x1FFF6436) else VybeSurfaceVariant.copy(alpha = 0.55f))
+            .background(if (isCurrent) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
             .border(
                 1.dp,
-                if (isCurrent) VybeOrange.copy(alpha = 0.5f) else VybeBorder.copy(alpha = 0.35f),
+                if (isCurrent) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
                 RoundedCornerShape(12.dp)
             )
             .clickable { onClick() }
@@ -199,7 +192,7 @@ private fun RecommendSongItem(
             modifier = Modifier
                 .size(54.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(VybeSurfaceVariant)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
             AsyncImage(
                 model = ImageRequest.Builder(context)
@@ -231,7 +224,7 @@ private fun RecommendSongItem(
         ) {
             Text(
                 text = song.title,
-                color = if (isCurrent) VybeOrange else VybeTextPrimary,
+                color = if (isCurrent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
@@ -242,7 +235,7 @@ private fun RecommendSongItem(
 
             Text(
                 text = song.artist,
-                color = VybeTextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -258,7 +251,7 @@ private fun RecommendSongItem(
                 Icon(
                     imageVector = Icons.Default.MoreVert,
                     contentDescription = "Options",
-                    tint = VybeTextMuted,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(18.dp)
                 )
             }
@@ -266,12 +259,12 @@ private fun RecommendSongItem(
             DropdownMenu(
                 expanded = menuExpanded,
                 onDismissRequest = { menuExpanded = false },
-                modifier = Modifier.background(VybeSurfaceVariant)
+                modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 DropdownMenuItem(
-                    text = { Text("Add to Queue", color = VybeTextPrimary) },
+                    text = { Text("Add to Queue", color = MaterialTheme.colorScheme.onSurface) },
                     leadingIcon = {
-                        Icon(Icons.AutoMirrored.Filled.QueueMusic, contentDescription = null, tint = VybeOrange)
+                        Icon(Icons.AutoMirrored.Filled.QueueMusic, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                     },
                     onClick = {
                         menuExpanded = false
@@ -280,13 +273,13 @@ private fun RecommendSongItem(
                 )
                 DropdownMenuItem(
                     text = {
-                        Text(if (song.isLiked) "Remove Favorite" else "Favorite", color = VybeTextPrimary)
+                        Text(if (song.isLiked) "Remove Favorite" else "Favorite", color = MaterialTheme.colorScheme.onSurface)
                     },
                     leadingIcon = {
                         Icon(
                             if (song.isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                             contentDescription = null,
-                            tint = if (song.isLiked) Color.Red else VybeCoral
+                            tint = if (song.isLiked) Color.Red else MaterialTheme.colorScheme.primary
                         )
                     },
                     onClick = {
@@ -295,9 +288,9 @@ private fun RecommendSongItem(
                     }
                 )
                 DropdownMenuItem(
-                    text = { Text("Share Song", color = VybeTextPrimary) },
+                    text = { Text("Share Song", color = MaterialTheme.colorScheme.onSurface) },
                     leadingIcon = {
-                        Icon(Icons.Outlined.Share, contentDescription = null, tint = VybeTextSecondary)
+                        Icon(Icons.Outlined.Share, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     },
                     onClick = {
                         menuExpanded = false

@@ -1,5 +1,6 @@
 package com.example.ui.offline
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -39,11 +40,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.theme.OutfitFontFamily
-import com.example.ui.theme.VybeBlack
-import com.example.ui.theme.VybeOrange
-import com.example.ui.theme.VybeSurfaceVariant
-import com.example.ui.theme.VybeTextMuted
-import com.example.ui.theme.VybeTextPrimary
 
 @Composable
 fun OfflineScreen(
@@ -64,7 +60,7 @@ fun OfflineScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(VybeBlack)
+            .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
             .testTag("offline_screen"),
         contentAlignment = Alignment.Center
@@ -79,14 +75,14 @@ fun OfflineScreen(
                 modifier = Modifier
                     .size(96.dp)
                     .clip(CircleShape)
-                    .background(VybeSurfaceVariant.copy(alpha = 0.7f))
-                    .border(1.5.dp, VybeOrange.copy(alpha = 0.45f), CircleShape),
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
+                    .border(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.WifiOff,
                     contentDescription = "Offline indicator",
-                    tint = VybeOrange,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(46.dp)
                 )
             }
@@ -96,7 +92,7 @@ fun OfflineScreen(
             // Main Text: "Offline"
             Text(
                 text = "Offline",
-                color = VybeTextPrimary,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = OutfitFontFamily,
@@ -114,13 +110,13 @@ fun OfflineScreen(
                     modifier = Modifier
                         .size(8.dp)
                         .clip(CircleShape)
-                        .background(VybeOrange)
+                        .background(MaterialTheme.colorScheme.primary)
                         .alpha(pulseAlpha)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Trying to connect...",
-                    color = VybeTextMuted,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 14.sp,
                     fontFamily = OutfitFontFamily,
                     modifier = Modifier
@@ -138,7 +134,7 @@ fun OfflineScreen(
                     .height(50.dp)
                     .testTag("offline_downloads_button"),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = VybeOrange
+                    containerColor = MaterialTheme.colorScheme.primary
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {

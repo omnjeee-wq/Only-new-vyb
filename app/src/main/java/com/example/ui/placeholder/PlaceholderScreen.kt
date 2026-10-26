@@ -1,5 +1,6 @@
 package com.example.ui.placeholder
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,10 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.components.NavDestination
 import com.example.ui.components.TopHeader
-import com.example.ui.theme.VybeBlack
-import com.example.ui.theme.VybeOrange
-import com.example.ui.theme.VybeTextMuted
-import com.example.ui.theme.VybeTextPrimary
 
 @Composable
 fun PlaceholderScreen(
@@ -57,7 +54,7 @@ fun PlaceholderScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(VybeBlack)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
@@ -74,20 +71,20 @@ fun PlaceholderScreen(
                 Icon(
                     imageVector = icon,
                     contentDescription = title,
-                    tint = VybeOrange,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(64.dp)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = title,
-                    color = VybeTextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = subtitle,
-                    color = VybeTextMuted,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center,
                     lineHeight = 20.sp

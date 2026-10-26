@@ -1,5 +1,6 @@
 package com.example.ui.components
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -58,14 +59,6 @@ import com.example.domain.model.SectionItem
 import com.example.domain.model.SectionItemType
 import com.example.domain.model.Song
 import com.example.ui.home.CollectionDetailState
-import com.example.ui.theme.VybeBlack
-import com.example.ui.theme.VybeOrange
-import com.example.ui.theme.VybePink
-import com.example.ui.theme.VybeSurface
-import com.example.ui.theme.VybeSurfaceVariant
-import com.example.ui.theme.VybeTextMuted
-import com.example.ui.theme.VybeTextPrimary
-import com.example.ui.theme.VybeTextSecondary
 import com.example.util.MusicUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,14 +83,14 @@ fun CollectionDetailSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = VybeSurface,
+        containerColor = MaterialTheme.colorScheme.surface,
         dragHandle = null,
         modifier = modifier.fillMaxHeight()
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(VybeSurface)
+                .background(MaterialTheme.colorScheme.surface)
                 .testTag("collection_sheet_${item.id}")
         ) {
             LazyColumn(
@@ -110,7 +103,7 @@ fun CollectionDetailSheet(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(390.dp)
-                            .background(VybeSurface)
+                            .background(MaterialTheme.colorScheme.surface)
                     ) {
                         AsyncImage(
                             model = ImageRequest.Builder(context)
@@ -133,7 +126,7 @@ fun CollectionDetailSheet(
                                         colors = listOf(
                                             Color.Transparent,
                                             Color.Transparent,
-                                            VybeSurface
+                                            MaterialTheme.colorScheme.surface
                                         )
                                     )
                                 )
@@ -162,7 +155,7 @@ fun CollectionDetailSheet(
                             ) {
                                 Text(
                                     text = badgeText,
-                                    color = VybeOrange,
+                                    color = MaterialTheme.colorScheme.primary,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
                                     letterSpacing = 1.sp
@@ -205,7 +198,7 @@ fun CollectionDetailSheet(
                         ) {
                             Text(
                                 text = item.title,
-                                color = VybeTextPrimary,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 fontSize = 28.sp,
                                 fontWeight = FontWeight.Bold,
                                 maxLines = 2,
@@ -216,7 +209,7 @@ fun CollectionDetailSheet(
 
                             Text(
                                 text = item.subtitle,
-                                color = VybeTextSecondary,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 14.sp,
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis
@@ -240,7 +233,7 @@ fun CollectionDetailSheet(
                             shape = RoundedCornerShape(24.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color.Transparent,
-                                disabledContainerColor = VybeSurfaceVariant
+                                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
                             ),
                             contentPadding = PaddingValues(0.dp),
                             modifier = Modifier
@@ -248,7 +241,7 @@ fun CollectionDetailSheet(
                                 .height(48.dp)
                                 .clip(RoundedCornerShape(24.dp))
                                 .background(
-                                    Brush.horizontalGradient(listOf(VybeOrange, VybePink))
+                                    Brush.horizontalGradient(listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary))
                                 )
                                 .testTag("collection_play_all")
                         ) {
@@ -279,7 +272,7 @@ fun CollectionDetailSheet(
                             enabled = state.songs.isNotEmpty(),
                             shape = RoundedCornerShape(24.dp),
                             colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = VybeTextPrimary
+                                contentColor = MaterialTheme.colorScheme.onSurface
                             ),
                             modifier = Modifier
                                 .weight(1f)
@@ -293,13 +286,13 @@ fun CollectionDetailSheet(
                                 Icon(
                                     imageVector = Icons.Default.Shuffle,
                                     contentDescription = null,
-                                    tint = VybeTextPrimary,
+                                    tint = MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     text = "Shuffle",
-                                    color = VybeTextPrimary,
+                                    color = MaterialTheme.colorScheme.onSurface,
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.SemiBold
                                 )
@@ -318,7 +311,7 @@ fun CollectionDetailSheet(
                             contentAlignment = Alignment.Center
                         ) {
                             CircularProgressIndicator(
-                                color = VybeOrange,
+                                color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(36.dp)
                             )
                         }
@@ -333,7 +326,7 @@ fun CollectionDetailSheet(
                         ) {
                             Text(
                                 text = state.errorMessage ?: "No songs available in this collection",
-                                color = VybeTextSecondary,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 14.sp,
                                 textAlign = TextAlign.Center
                             )
@@ -350,7 +343,7 @@ fun CollectionDetailSheet(
                         ) {
                             Text(
                                 text = "TRACKS (${state.songs.size})",
-                                color = VybeTextMuted,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 1.sp
@@ -402,12 +395,12 @@ private fun TrackRow(
             if (isPlaying) {
                 EqualizerWaveformIndicator(
                     modifier = Modifier.size(18.dp),
-                    color = VybeOrange
+                    color = MaterialTheme.colorScheme.primary
                 )
             } else {
                 Text(
                     text = "$trackIndex",
-                    color = if (isCurrent) VybeOrange else VybeTextMuted,
+                    color = if (isCurrent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -422,7 +415,7 @@ private fun TrackRow(
         ) {
             Text(
                 text = song.title,
-                color = if (isCurrent) VybeOrange else VybeTextPrimary,
+                color = if (isCurrent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                 fontSize = 14.sp,
                 fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Medium,
                 maxLines = 1,
@@ -431,7 +424,7 @@ private fun TrackRow(
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = song.artist,
-                color = VybeTextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -443,7 +436,7 @@ private fun TrackRow(
         // Duration
         Text(
             text = MusicUtils.formatDuration(song.durationSeconds),
-            color = VybeTextMuted,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 12.sp
         )
 
@@ -457,7 +450,7 @@ private fun TrackRow(
             Icon(
                 imageVector = if (song.isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                 contentDescription = "Favorite",
-                tint = if (song.isLiked) Color.Red else VybeTextMuted,
+                tint = if (song.isLiked) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(18.dp)
             )
         }
