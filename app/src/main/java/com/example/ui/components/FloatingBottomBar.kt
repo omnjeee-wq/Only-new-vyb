@@ -57,20 +57,16 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import androidx.compose.foundation.layout.navigationBarsPadding
 import com.example.player.PlayerState
-import com.example.ui.theme.GlowOrange
 import com.example.ui.theme.OutfitFontFamily
 import com.example.ui.theme.VybeBorder
 import com.example.ui.theme.VybeCoral
 import com.example.ui.theme.VybeGlass
 import com.example.ui.theme.VybeOrange
-import com.example.ui.theme.VybePink
 import com.example.ui.theme.VybeSurfaceVariant
 import com.example.ui.theme.VybeTextMuted
 import com.example.ui.theme.VybeTextPrimary
 import com.example.ui.theme.VybeTextSecondary
 import com.example.ui.theme.glowingBorder
-import com.example.ui.theme.neonGlow
-import com.example.ui.theme.pulsingGlow
 
 enum class NavDestination {
     HOME,
@@ -202,7 +198,7 @@ fun FloatingBottomBar(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(2.dp),
-                            color = VybeOrange,
+                            color = Color(0xFFB58AE8),
                             trackColor = Color.Transparent
                         )
                     }
@@ -215,13 +211,12 @@ fun FloatingBottomBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(66.dp)
-                .neonGlow(color = GlowOrange, radius = 22.dp, alpha = 0.22f, cornerRadius = 33.dp)
                 .clip(RoundedCornerShape(33.dp))
-                .background(Color(0xF0101016))
+                .background(Color(0xF51D141F))
                 .glowingBorder(
-                    color = GlowOrange.copy(alpha = 0.35f),
+                    color = Color(0xFF403044),
                     strokeWidth = 1.dp,
-                    glowRadius = 10.dp,
+                    glowRadius = 0.dp,
                     cornerRadius = 33.dp
                 )
                 .padding(horizontal = 8.dp),
@@ -254,17 +249,10 @@ fun FloatingBottomBar(
                 Box(
                     modifier = Modifier
                         .size(48.dp)
-                        .pulsingGlow(
-                            color = GlowOrange,
-                            minRadius = 6.dp,
-                            maxRadius = 16.dp,
-                            minAlpha = 0.35f,
-                            maxAlpha = 0.85f
-                        )
                         .clip(CircleShape)
                         .background(
                             Brush.linearGradient(
-                                listOf(VybePink, VybeOrange)
+                                listOf(Color(0xFFB58AE8), Color(0xFF9D75D0))
                             )
                         )
                         .border(1.5.dp, Color.White.copy(alpha = 0.4f), CircleShape)
@@ -312,7 +300,7 @@ private fun NavIconItem(
     Column(
         modifier = Modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(if (selected) Color(0x28FF6436) else Color.Transparent)
+            .background(if (selected) Color(0x24B58AE8) else Color.Transparent)
             .clickable { onClick() }
             .padding(horizontal = 12.dp, vertical = 6.dp)
             .testTag("nav_item_${label.lowercase()}"),
@@ -322,12 +310,12 @@ private fun NavIconItem(
         Icon(
             imageVector = if (selected) selectedIcon else unselectedIcon,
             contentDescription = label,
-            tint = if (selected) VybeOrange else VybeTextMuted,
+            tint = if (selected) Color(0xFFB58AE8) else VybeTextMuted,
             modifier = Modifier
                 .size(22.dp)
                 .then(
                     if (selected) {
-                        Modifier.neonGlow(color = GlowOrange, radius = 6.dp, alpha = 0.6f)
+                        Modifier.then(Modifier)
                     } else {
                         Modifier
                     }
@@ -336,7 +324,7 @@ private fun NavIconItem(
         Spacer(modifier = Modifier.height(2.dp))
         Text(
             text = label,
-            color = if (selected) VybeOrange else VybeTextMuted,
+            color = if (selected) Color(0xFFB58AE8) else VybeTextMuted,
             fontSize = 10.sp,
             fontFamily = OutfitFontFamily,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
@@ -346,9 +334,9 @@ private fun NavIconItem(
             Box(
                 modifier = Modifier
                     .size(4.dp)
-                    .neonGlow(color = GlowOrange, radius = 4.dp, alpha = 0.8f)
+                    .then(Modifier)
                     .clip(CircleShape)
-                    .background(VybeOrange)
+                    .background(Color(0xFFB58AE8))
             )
         }
     }
