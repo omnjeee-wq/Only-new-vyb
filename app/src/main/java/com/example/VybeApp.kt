@@ -5,6 +5,7 @@ import com.example.data.drive.GoogleDriveManager
 import com.example.data.local.VybeDatabase
 import com.example.data.remote.RetrofitClient
 import com.example.data.repository.MusicRepositoryImpl
+import com.example.domain.recommendation.PlaylistFeedEngine
 import com.example.domain.recommendation.RecommendationEngine
 import com.example.domain.repository.MusicRepository
 import com.example.player.PlayerManager
@@ -22,6 +23,7 @@ class VybeApp : Application() {
         private set
 
     lateinit var recommendationEngine: RecommendationEngine
+    lateinit var playlistFeedEngine: PlaylistFeedEngine
         private set
 
     lateinit var playerManager: PlayerManager
@@ -40,6 +42,7 @@ class VybeApp : Application() {
         database = VybeDatabase.getInstance(this)
         repository = MusicRepositoryImpl(RetrofitClient.apiService, database.songDao())
         recommendationEngine = RecommendationEngine(repository, database.songDao())
+        playlistFeedEngine = PlaylistFeedEngine(repository, database.songDao())
         playerManager = PlayerManager.initialize(this, repository)
         updateManager = com.example.data.update.UpdateManager(this)
         driveManager = GoogleDriveManager(
