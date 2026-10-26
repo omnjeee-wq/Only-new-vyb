@@ -166,7 +166,14 @@ fun Modifier.glowingBorder(
             this.strokeWidth = strokePx * 2.5f
             this.asFrameworkPaint().apply {
                 isAntiAlias = true
-                maskFilter = BlurMaskFilter(glowRadius.toPx(), BlurMaskFilter.Blur.NORMAL)
+                // Guard against invalid blur radii on devices where density/size
+                // calculations can produce zero or a non-finite value.
+                val safeBlurRadius = glowRadius.toPx().let { radius ->
+                    if (radius.isFinite() && radius > 0f) radius else 1f
+                }
+                maskFilter = runCatching {
+                    BlurMaskFilter(safeBlurRadius, BlurMaskFilter.Blur.NORMAL)
+                }.getOrNull()
             }
         }
         canvas.drawRoundRect(
