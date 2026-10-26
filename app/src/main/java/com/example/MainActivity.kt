@@ -49,6 +49,7 @@ class MainActivity : ComponentActivity() {
                 return HomeViewModel(
                     repository = app.repository,
                     recommendationEngine = app.recommendationEngine,
+                    playlistFeedEngine = app.playlistFeedEngine,
                     playerManager = app.playerManager
                 ) as T
             }
