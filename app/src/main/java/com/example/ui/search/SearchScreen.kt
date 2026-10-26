@@ -67,8 +67,6 @@ import com.example.ui.home.CollectionDetailState
 import com.example.ui.components.EqualizerWaveformIndicator
 import com.example.ui.theme.VybeBlack
 import com.example.ui.theme.VybeBorder
-import com.example.ui.theme.VybeOrange
-import com.example.ui.theme.VybePink
 import com.example.ui.theme.VybeSurface
 import com.example.ui.theme.VybeSurfaceVariant
 import com.example.ui.theme.VybeTextMuted
@@ -250,7 +248,7 @@ private fun SearchHeaderBar(
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search Icon",
-                        tint = if (query.isNotBlank()) VybeOrange else VybeTextMuted,
+                        tint = if (query.isNotBlank()) Color(0xFFB58AE8) else VybeTextMuted,
                         modifier = Modifier.size(20.dp)
                     )
                 },
@@ -279,9 +277,9 @@ private fun SearchHeaderBar(
                     disabledContainerColor = VybeSurface,
                     focusedTextColor = VybeTextPrimary,
                     unfocusedTextColor = VybeTextPrimary,
-                    focusedBorderColor = VybeOrange,
+                    focusedBorderColor = Color(0xFFB58AE8),
                     unfocusedBorderColor = VybeBorder,
-                    cursorColor = VybeOrange
+                    cursorColor = Color(0xFFB58AE8)
                 ),
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Search
@@ -301,7 +299,7 @@ private fun SearchHeaderBar(
                     .clip(CircleShape)
                     .background(
                         Brush.linearGradient(
-                            listOf(VybeOrange, VybePink)
+                            listOf(Color(0xFFB58AE8), Color(0xFF9D75D0))
                         )
                     )
                     .testTag("search_submit_button")
