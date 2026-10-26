@@ -1,6 +1,7 @@
 package com.example.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -26,7 +28,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -41,6 +46,7 @@ import com.example.domain.model.SectionItem
 import com.example.domain.model.SectionItemType
 import com.example.domain.model.Song
 import com.example.ui.theme.VybeOrange
+import com.example.ui.theme.OutfitFontFamily
 import com.example.ui.theme.VybeSurfaceVariant
 import com.example.ui.theme.VybeTextPrimary
 import com.example.ui.theme.VybeTextSecondary
@@ -62,7 +68,7 @@ fun HorizontalSection(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp)
+            .padding(vertical = 14.dp)
             .testTag("section_${section.id}")
     ) {
         // Section Header
@@ -76,9 +82,10 @@ fun HorizontalSection(
             Text(
                 text = section.title,
                 color = VybeTextPrimary,
-                fontSize = 18.sp,
+                fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                letterSpacing = (-0.2).sp
+                fontFamily = OutfitFontFamily,
+                letterSpacing = (-0.3).sp
             )
 
             Row(
@@ -108,15 +115,20 @@ fun HorizontalSection(
         }
 
         // Horizontal items (Albums / Charts / Playlists)
+        // Screen ke hisaab se bade cards (~2.2 cards visible), JioSaavn jaisa
+        val screenWidth = LocalConfiguration.current.screenWidthDp
+        val cardSize = remember(screenWidth) { (screenWidth * 0.44f).coerceIn(150f, 220f).dp }
+
         LazyRow(
             contentPadding = PaddingValues(horizontal = 20.dp),
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
-            modifier = Modifier.padding(top = 10.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(top = 12.dp)
         ) {
             if (hasItems) {
                 items(section.items, key = { it.id }) { item ->
                     CollectionSquareCard(
                         item = item,
+                        size = cardSize,
                         onClick = { onCollectionClick(item) },
                         onPlayClick = { onPlayCollectionClick(item) }
                     )
@@ -126,6 +138,7 @@ fun HorizontalSection(
                     val isCurrent = song.id == currentPlayingSongId
                     SongSquareCard(
                         song = song,
+                        size = cardSize,
                         isCurrent = isCurrent,
                         isPlaying = isPlaying && isCurrent,
                         onClick = { onSongClick(song, section.songs) }
@@ -139,23 +152,26 @@ fun HorizontalSection(
 @Composable
 private fun CollectionSquareCard(
     item: SectionItem,
+    size: androidx.compose.ui.unit.Dp,
     onClick: () -> Unit,
     onPlayClick: () -> Unit
 ) {
     val context = LocalContext.current
+    val shape = RoundedCornerShape(16.dp)
 
     Column(
         modifier = Modifier
-            .width(136.dp)
-            .clip(RoundedCornerShape(12.dp))
+            .width(size)
+            .clip(shape)
             .clickable { onClick() }
             .testTag("collection_card_${item.id}")
     ) {
         Box(
             modifier = Modifier
-                .size(136.dp)
-                .clip(RoundedCornerShape(12.dp))
+                .size(size)
+                .clip(shape)
                 .background(VybeSurfaceVariant)
+                .border(0.5.dp, Color(0x14FFFFFF), shape)
         ) {
             AsyncImage(
                 model = ImageRequest.Builder(context)
@@ -164,40 +180,31 @@ private fun CollectionSquareCard(
                     .build(),
                 contentDescription = item.title,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxSize()
             )
 
-            // Subtle badge on top left
-            val badgeLabel = when (item.type) {
-                SectionItemType.ALBUM -> "ALBUM"
-                SectionItemType.CHART -> "CHART"
-                SectionItemType.PLAYLIST -> "PLAYLIST"
-            }
+            // Neeche halka scrim: play button hamesha saaf dikhe, art par heavy badge nahi
             Box(
                 modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(6.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(Color(0xCC000000))
-                    .padding(horizontal = 6.dp, vertical = 2.dp)
-            ) {
-                Text(
-                    text = badgeLabel,
-                    color = Color.White,
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 0.5.sp
-                )
-            }
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .height(size * 0.38f)
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color.Transparent, Color(0x99000000))
+                        )
+                    )
+            )
 
-            // Floating Play Action button on bottom right
+            // Minimal glass play button
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(8.dp)
-                    .size(30.dp)
+                    .padding(10.dp)
+                    .size(38.dp)
                     .clip(CircleShape)
-                    .background(Color(0xE6000000))
+                    .background(Color(0xCC0B0B0F))
+                    .border(0.5.dp, Color(0x33FFFFFF), CircleShape)
                     .clickable { onPlayClick() },
                 contentAlignment = Alignment.Center
             ) {
@@ -205,32 +212,32 @@ private fun CollectionSquareCard(
                     imageVector = Icons.Default.PlayArrow,
                     contentDescription = "Play Collection",
                     tint = VybeOrange,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(22.dp)
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
-        // Title
         Text(
             text = item.title,
             color = VybeTextPrimary,
-            fontSize = 13.sp,
+            fontSize = 15.sp,
             fontWeight = FontWeight.SemiBold,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 2.dp)
         )
 
-        Spacer(modifier = Modifier.height(2.dp))
+        Spacer(modifier = Modifier.height(3.dp))
 
-        // Subtitle (Artist or Chart info)
         Text(
             text = item.subtitle,
             color = VybeTextSecondary,
-            fontSize = 11.sp,
+            fontSize = 12.sp,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 2.dp)
         )
     }
 }
@@ -238,24 +245,27 @@ private fun CollectionSquareCard(
 @Composable
 private fun SongSquareCard(
     song: Song,
+    size: androidx.compose.ui.unit.Dp,
     isCurrent: Boolean,
     isPlaying: Boolean,
     onClick: () -> Unit
 ) {
     val context = LocalContext.current
+    val shape = RoundedCornerShape(16.dp)
 
     Column(
         modifier = Modifier
-            .width(132.dp)
-            .clip(RoundedCornerShape(12.dp))
+            .width(size)
+            .clip(shape)
             .clickable { onClick() }
             .testTag("song_card_${song.id}")
     ) {
         Box(
             modifier = Modifier
-                .size(132.dp)
-                .clip(RoundedCornerShape(12.dp))
+                .size(size)
+                .clip(shape)
                 .background(VybeSurfaceVariant)
+                .border(0.5.dp, Color(0x14FFFFFF), shape)
         ) {
             AsyncImage(
                 model = ImageRequest.Builder(context)
@@ -264,56 +274,59 @@ private fun SongSquareCard(
                     .build(),
                 contentDescription = song.title,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxSize()
             )
 
             if (isCurrent && isPlaying) {
                 Box(
                     modifier = Modifier
-                        .size(132.dp)
+                        .fillMaxSize()
                         .background(Color(0x66000000)),
                     contentAlignment = Alignment.Center
                 ) {
-                    EqualizerWaveformIndicator(modifier = Modifier.size(28.dp), color = VybeOrange)
+                    EqualizerWaveformIndicator(modifier = Modifier.size(32.dp), color = VybeOrange)
                 }
             } else {
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .padding(8.dp)
-                        .size(28.dp)
-                        .background(Color(0x99000000), CircleShape),
+                        .padding(10.dp)
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xCC0B0B0F)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
                         contentDescription = "Play",
                         tint = Color.White,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         Text(
             text = song.title,
             color = if (isCurrent) VybeOrange else VybeTextPrimary,
-            fontSize = 13.sp,
+            fontSize = 15.sp,
             fontWeight = FontWeight.SemiBold,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 2.dp)
         )
 
-        Spacer(modifier = Modifier.height(2.dp))
+        Spacer(modifier = Modifier.height(3.dp))
 
         Text(
             text = song.artist,
             color = VybeTextSecondary,
-            fontSize = 11.sp,
+            fontSize = 12.sp,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 2.dp)
         )
     }
 }
