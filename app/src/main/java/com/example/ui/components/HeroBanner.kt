@@ -520,15 +520,15 @@ fun HeroBanner(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(if (isCompactNarrow) 8.dp else 10.dp)
                         ) {
-                            // Standalone music-note mark without the colored circle.
+                            // Use the app's actual VYBE logo asset, without an extra badge behind it.
                             Image(
-                                painter = painterResource(id = R.drawable.ic_vybe_note),
+                                painter = painterResource(id = R.drawable.vybe_logo),
                                 contentDescription = "VYBE logo",
                                 contentScale = ContentScale.Fit,
                                 modifier = Modifier.size(
-                                    if (isCompactNarrow) 42.dp
-                                    else if (isCompact) 48.dp
-                                    else 54.dp
+                                    if (isCompactNarrow) 44.dp
+                                    else if (isCompact) 50.dp
+                                    else 56.dp
                                 )
                             )
 
