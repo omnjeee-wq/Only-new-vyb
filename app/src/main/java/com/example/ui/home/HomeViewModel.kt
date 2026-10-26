@@ -8,6 +8,7 @@ import com.example.domain.model.Playlist
 import com.example.domain.model.SectionItem
 import com.example.domain.model.SectionItemType
 import com.example.domain.model.Song
+import com.example.domain.recommendation.PlaylistFeedEngine
 import com.example.domain.recommendation.RecommendationEngine
 import com.example.domain.repository.MusicRepository
 import com.example.player.PlayerManager
@@ -40,8 +41,11 @@ data class HomeUiState(
 class HomeViewModel(
     private val repository: MusicRepository,
     private val recommendationEngine: RecommendationEngine,
+    private val playlistFeedEngine: PlaylistFeedEngine,
     private val playerManager: PlayerManager
 ) : ViewModel() {
+
+    private var feedKey: String? = null
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
@@ -85,6 +89,34 @@ class HomeViewModel(
         viewModelScope.launch {
             playerManager.heroRefreshSignal.collect {
                 refreshRecommendationsAndHero()
+                refreshPlaylistsIfTasteChanged()
+            }
+        }
+    }
+
+    /** Taste-based playlist feed. Fail/empty ho to purana fixed list fallback. */
+    private suspend fun loadPlaylistSections(): Result<List<HomeSection>> {
+        val key = playlistFeedEngine.currentKey()
+        val feed = playlistFeedEngine.buildFeed()
+        if (feed.isNotEmpty()) {
+            feedKey = key
+            return Result.success(feed)
+        }
+        return repository.getHomeSections()
+    }
+
+    /**
+     * Har 5 qualifying plays pe check hota hai (per-song nahi). Feed tabhi badalta hai jab
+     * din/din-ka-hissa/top language/top artist badle, warna kuch nahi hota.
+     */
+    private fun refreshPlaylistsIfTasteChanged() {
+        viewModelScope.launch {
+            val key = playlistFeedEngine.currentKey()
+            if (key == feedKey) return@launch
+            val feed = playlistFeedEngine.buildFeed()
+            if (feed.isNotEmpty()) {
+                feedKey = key
+                _uiState.update { it.copy(sections = feed) }
             }
         }
     }
@@ -94,7 +126,7 @@ class HomeViewModel(
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
             val candidatesDeferred = async { repository.getRecommendationCandidates() }
-            val sectionsDeferred = async { repository.getHomeSections() }
+            val sectionsDeferred = async { loadPlaylistSections() }
             val personalDeferred = async { recommendationEngine.fetchPersonalPool() }
 
             val candidates = candidatesDeferred.await()
