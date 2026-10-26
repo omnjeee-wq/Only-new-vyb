@@ -255,8 +255,6 @@ fun HeroBanner(
         val playButtonFontSize = if (isCompactNarrow) 12.sp else 13.sp
 
         // 7. Adaptive Top Bar Sizing
-        val logoSize = if (isCompactNarrow) 28.dp else if (isCompact) 32.dp else 38.dp
-        val logoInnerSize = if (isCompactNarrow) 38.dp else if (isCompact) 42.dp else 48.dp
         val vybeTitleFontSize = if (isCompactNarrow) 22.sp else if (isCompact) 25.sp else 28.sp
         val shareButtonSize = if (isCompactNarrow) 34.dp else 38.dp
         val shareIconSize = if (isCompactNarrow) 16.dp else 19.dp
@@ -352,7 +350,8 @@ fun HeroBanner(
                         )
                 )
 
-                // Bottom fade gradient
+                // Theme-aware fade: blend into the screen background.
+                val screenBackground = MaterialTheme.colorScheme.background
                 val bottomFadeHeight = (bannerHeight * 0.28f).coerceIn(80.dp, 120.dp)
                 Box(
                     modifier = Modifier
@@ -362,8 +361,9 @@ fun HeroBanner(
                         .background(
                             Brush.verticalGradient(
                                 0f to Color.Transparent,
-                                0.35f to Color(0x77000000),
-                                1f to Color.Black
+                                0.38f to screenBackground.copy(alpha = 0.30f),
+                                0.72f to screenBackground.copy(alpha = 0.82f),
+                                1f to screenBackground
                             )
                         )
                 )
@@ -520,40 +520,25 @@ fun HeroBanner(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(if (isCompactNarrow) 8.dp else 10.dp)
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(logoSize)
-                                    .neonGlow(
-                                        color = themeColor,
-                                        radius = if (isCompactNarrow) 8.dp else 10.dp,
-                                        alpha = 0.6f
-                                    )
-                                    .background(
-                                        Brush.linearGradient(
-                                            listOf(
-                                                MaterialTheme.colorScheme.primary,
-                                                themeColor
-                                            )
-                                        ),
-                                        CircleShape
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.vybe_logo),
-                                    contentDescription = "VYBE Logo",
-                                    contentScale = ContentScale.Fit,
-                                    modifier = Modifier.size(logoInnerSize)
+                            // Standalone music-note mark without the colored circle.
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_vybe_note),
+                                contentDescription = "VYBE logo",
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier.size(
+                                    if (isCompactNarrow) 42.dp
+                                    else if (isCompact) 48.dp
+                                    else 54.dp
                                 )
-                            }
+                            )
 
                             Text(
                                 text = "VYBE",
                                 color = Color.White,
                                 fontSize = vybeTitleFontSize,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontFamily = OutfitFontFamily,
-                                letterSpacing = 1.5.sp
+                                fontWeight = FontWeight.Black,
+                                fontFamily = FontFamily.SansSerif,
+                                letterSpacing = (-0.6).sp
                             )
                         }
 
