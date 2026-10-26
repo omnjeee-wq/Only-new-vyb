@@ -55,7 +55,7 @@ class SettingsViewModel(
     private val _themeMode = MutableStateFlow("Dark")
     val themeMode: StateFlow<String> = _themeMode.asStateFlow()
 
-    private val _accentColor = MutableStateFlow("#B58AE8")
+    private val _accentColor = MutableStateFlow("#FF6436")
     val accentColor: StateFlow<String> = _accentColor.asStateFlow()
 
     private val _dynamicTheme = MutableStateFlow(false)
@@ -167,7 +167,7 @@ class SettingsViewModel(
 
                 // 2. Appearance
                 _themeMode.value = songDao.getPreference("pref_theme_mode") ?: "Dark"
-                _accentColor.value = songDao.getPreference("pref_accent_color") ?: "#B58AE8"
+                _accentColor.value = songDao.getPreference("pref_accent_color") ?: "#FF6436"
                 _dynamicTheme.value = songDao.getPreference("pref_dynamic_theme")?.toBooleanStrictOrNull() ?: false
                 _useArtworkColors.value = songDao.getPreference("pref_use_artwork_colors")?.toBooleanStrictOrNull() ?: true
 
