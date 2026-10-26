@@ -204,9 +204,12 @@ class MusicRepositoryImpl(
         }
     }
 
-    private suspend fun fetchSectionPlaylists(query: String, limit: Int, isChart: Boolean = false): List<SectionItem> {
+    override suspend fun getPlaylistItems(query: String, limit: Int, page: Int): List<SectionItem> =
+        withContext(Dispatchers.IO) { fetchSectionPlaylists(query, limit, page = page) }
+
+    private suspend fun fetchSectionPlaylists(query: String, limit: Int, isChart: Boolean = false, page: Int = 1): List<SectionItem> {
         return try {
-            val response = apiService.searchPlaylists(query = query, limit = limit)
+            val response = apiService.searchPlaylists(query = query, page = page, limit = limit)
             val results = response.data?.results ?: emptyList()
             results.map {
                 val count = it.songCount?.toIntOrNull() ?: 0
