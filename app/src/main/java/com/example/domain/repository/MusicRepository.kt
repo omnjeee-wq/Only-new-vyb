@@ -4,12 +4,15 @@ import com.example.domain.model.Album
 import com.example.domain.model.HomeSection
 import com.example.domain.model.ListeningEventType
 import com.example.domain.model.Playlist
+import com.example.domain.model.SectionItem
 import com.example.domain.model.Song
 import kotlinx.coroutines.flow.Flow
 
 interface MusicRepository {
     suspend fun getHomeSections(): Result<List<HomeSection>>
     suspend fun getRecommendationCandidates(): List<Song>
+    /** Playlist search -> home cards. Default empty so test fakes still compile. */
+    suspend fun getPlaylistItems(query: String, limit: Int = 15, page: Int = 1): List<SectionItem> = emptyList()
     suspend fun searchSongs(query: String, limit: Int = 15): Result<List<Song>>
     suspend fun searchAlbums(query: String, limit: Int = 10): Result<List<Album>>
     suspend fun searchPlaylists(query: String, limit: Int = 10): Result<List<Playlist>>
