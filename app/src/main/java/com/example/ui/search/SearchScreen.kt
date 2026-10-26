@@ -250,7 +250,7 @@ private fun SearchHeaderBar(
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search Icon",
-                        tint = if (query.isNotBlank()) Color(0xFFB58AE8) else VybeTextMuted,
+                        tint = if (query.isNotBlank()) VybeOrange else VybeTextMuted,
                         modifier = Modifier.size(20.dp)
                     )
                 },
@@ -279,9 +279,9 @@ private fun SearchHeaderBar(
                     disabledContainerColor = VybeSurface,
                     focusedTextColor = VybeTextPrimary,
                     unfocusedTextColor = VybeTextPrimary,
-                    focusedBorderColor = Color(0xFFB58AE8),
+                    focusedBorderColor = VybeOrange,
                     unfocusedBorderColor = VybeBorder,
-                    cursorColor = Color(0xFFB58AE8)
+                    cursorColor = VybeOrange
                 ),
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Search
@@ -301,7 +301,7 @@ private fun SearchHeaderBar(
                     .clip(CircleShape)
                     .background(
                         Brush.linearGradient(
-                            listOf(Color(0xFFB58AE8), Color(0xFF9D75D0))
+                            listOf(VybeOrange, VybePink)
                         )
                     )
                     .testTag("search_submit_button")
