@@ -684,12 +684,12 @@ fun HeroBanner(
                 }
             }
 
-            // Clean bottom separator
+            // Seamless spacer matching the current app theme, never hardcoded black.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(separatorHeight)
-                    .background(Color.Black)
+                    .background(MaterialTheme.colorScheme.background)
             )
         }
     }
