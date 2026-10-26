@@ -90,10 +90,13 @@ private val GreatVibesFontFamily = FontFamily(
 )
 
 private val VibrantThemePalette = listOf(
-    Color(0xFFB58AE8), // VYBE lavender
-    Color(0xFFD58A9A), // muted rose
-    Color(0xFFB98578), // warm dusk
-    Color(0xFF8F789F)  // soft plum
+    Color(0xFFFF6436),
+    Color(0xFFFF2A85),
+    Color(0xFF00E5FF),
+    Color(0xFFA855F7),
+    Color(0xFFFFB800),
+    Color(0xFF10B981),
+    Color(0xFFFF3366)
 )
 
 @Composable
@@ -417,7 +420,7 @@ fun HeroBanner(
                             )
                             .border(
                                 1.5.dp,
-                                themeColor.copy(alpha = 0.16f),
+                                themeColor.copy(alpha = 0.65f),
                                 CircleShape
                             )
                     ) {
@@ -479,7 +482,7 @@ fun HeroBanner(
                                 .align(Alignment.Center)
                                 .size(centerHoleSize)
                                 .clip(CircleShape)
-                                .background(Color.Black.copy(alpha = 0.28f))
+                                .background(Color.Black.copy(alpha = 0.65f))
                                 .border(
                                     1.dp,
                                     Color.White.copy(alpha = 0.25f),
