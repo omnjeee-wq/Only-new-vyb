@@ -117,7 +117,7 @@ class MainActivity : ComponentActivity() {
                 try {
                     Color(android.graphics.Color.parseColor(accentColorHex))
                 } catch (_: Exception) {
-                    VybeOrange
+                    Color(0xFFB58AE8)
                 }
             }
 
