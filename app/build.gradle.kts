@@ -104,6 +104,13 @@ dependencies {
   implementation(libs.androidx.media3.session)
   implementation(libs.androidx.media3.ui)
   implementation(libs.androidx.media3.common)
+
+  // InnerTubeX: YouTube Music search + audio stream extraction.
+  implementation("com.github.MetrolistGroup.innertubex:innertubex:v0.11.0")
+  implementation("io.ktor:ktor-client-okhttp:3.6.0")
+  implementation("io.ktor:ktor-client-content-negotiation:3.6.0")
+  implementation("io.ktor:ktor-serialization-kotlinx-json:3.6.0")
+
   implementation(libs.converter.moshi)
   implementation(libs.firebase.ai)
   // Uncomment to use Firestore:
