@@ -779,8 +779,14 @@ fun Song.toMediaItem(preferredQuality: String? = null): MediaItem {
         if (localFile.exists() && localFile.length() > 0) {
             Uri.fromFile(localFile)
         } else {
-            val resolvedUrl = com.example.util.MusicUtils.applyQualityToUrl(streamUrl, effectiveQuality)
-            Uri.parse(resolvedUrl)
+            Uri.Builder()
+            .scheme("https")
+            .authority(InnerTubePlaybackResolver.PLACEHOLDER_HOST)
+            .appendPath("resolve")
+            .appendQueryParameter("title", title)
+            .appendQueryParameter("artist", artist)
+            .appendQueryParameter("quality", effectiveQuality)
+            .build()
         }
     }
 
