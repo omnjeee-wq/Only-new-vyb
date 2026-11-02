@@ -16,6 +16,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.Renderer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
 import androidx.media3.exoplayer.video.VideoRendererEventListener
 import androidx.media3.session.DefaultMediaNotificationProvider
@@ -75,6 +76,7 @@ class VybePlaybackService : MediaSessionService() {
         }
 
         val player = ExoPlayer.Builder(this, renderersFactory)
+            .setMediaSourceFactory(InnerTubePlaybackResolver.createMediaSourceFactory(this))
             .setAudioAttributes(audioAttributes, /* handleAudioFocus = */ true)
             .setHandleAudioBecomingNoisy(true)
             .apply {
