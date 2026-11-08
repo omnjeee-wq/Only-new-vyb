@@ -35,6 +35,14 @@ jobs:
           path: ~/gradle-dist
           key: gradle-dist-${{ env.GRADLE_VERSION }}
 
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+          key: gradle-deps-${{ hashFiles('**/*.gradle.kts', 'gradle/libs.versions.toml') }}
+          restore-keys: gradle-deps-
+
       - name: Network check (debug)
         continue-on-error: true
         run: |
