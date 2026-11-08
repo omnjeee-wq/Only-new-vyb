@@ -35,33 +35,51 @@ jobs:
           path: ~/gradle-dist
           key: gradle-dist-${{ env.GRADLE_VERSION }}
 
-      - name: Install Gradle ${{ env.GRADLE_VERSION }}
+      - name: Network check (debug)
+        continue-on-error: true
+        run: |
+          for u in https://services.gradle.org https://github.com https://repo.maven.apache.org https://mirrors.cloud.tencent.com/gradle/ https://repo.huaweicloud.com/gradle/; do
+            echo -n "$u -> "
+            curl -s -o /dev/null -m 15 -w "%{http_code}\n" -I "$u" || echo "fail"
+          done
+
+      - name: Install Gradle ${{ env.GRADLE_VERSION }} (mirrors)
+        id: manual
+        continue-on-error: true
         run: |
           set -e
           mkdir -p "$HOME/gradle-dist"
           ZIP="$HOME/gradle-dist/gradle-${GRADLE_VERSION}-bin.zip"
           if [ ! -s "$ZIP" ]; then
             ok=0
-            for attempt in 1 2 3 4 5 6; do
-              for base in \
-                "https://services.gradle.org/distributions" \
-                "https://downloads.gradle.org/distributions" \
-                "https://github.com/gradle/gradle-distributions/releases/download/v${GRADLE_VERSION}"; do
-                echo "Attempt $attempt: $base"
-                if curl -fSL --retry 3 --retry-delay 5 --retry-all-errors \
-                     --connect-timeout 30 --max-time 300 \
-                     -o "$ZIP" "$base/gradle-${GRADLE_VERSION}-bin.zip"; then
+            for attempt in 1 2 3; do
+              for url in \
+                "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" \
+                "https://downloads.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" \
+                "https://mirrors.cloud.tencent.com/gradle/gradle-${GRADLE_VERSION}-bin.zip" \
+                "https://repo.huaweicloud.com/gradle/gradle-${GRADLE_VERSION}-bin.zip" \
+                "https://mirrors.aliyun.com/gradle/gradle-${GRADLE_VERSION}-bin.zip"; do
+                echo "Attempt $attempt: $url"
+                if curl -fSL --retry 2 --retry-delay 3 --retry-all-errors \
+                     --connect-timeout 20 --max-time 240 -o "$ZIP" "$url" \
+                   && unzip -tq "$ZIP" >/dev/null 2>&1; then
                   ok=1; break 2
                 fi
                 rm -f "$ZIP"
               done
-              echo "All mirrors failed, waiting 20s..."
-              sleep 20
+              sleep 10
             done
-            [ "$ok" = "1" ] || { echo "Gradle download failed"; exit 1; }
+            [ "$ok" = "1" ] || { echo "Mirror download failed"; exit 1; }
           fi
           unzip -q -o "$ZIP" -d "$HOME/gradle"
           echo "$HOME/gradle/gradle-${GRADLE_VERSION}/bin" >> "$GITHUB_PATH"
+
+      # Fallback: agar mirrors fail ho jaye to official action use karo
+      - name: Install Gradle (action fallback)
+        if: steps.manual.outcome == 'failure'
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: ${{ env.GRADLE_VERSION }}
 
       - name: Verify Gradle
         run: gradle --version
