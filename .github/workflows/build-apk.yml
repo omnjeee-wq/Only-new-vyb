@@ -94,7 +94,23 @@ jobs:
             -dname "CN=Android Debug,O=Android,C=US"
 
       - name: Build Debug APK
-        run: gradle assembleDebug --no-daemon --stacktrace
+        run: |
+          # Dependency download network error par 3 baar retry
+          for i in 1 2 3; do
+            echo "=== Build attempt $i ==="
+            if gradle assembleDebug --no-daemon --console=plain \
+                 -Dorg.gradle.internal.http.connectionTimeout=60000 \
+                 -Dorg.gradle.internal.http.socketTimeout=120000 \
+                 -Dorg.gradle.internal.repository.max.retries=10 \
+                 -Dorg.gradle.internal.repository.initial.backoff=1000 \
+                 2>&1 | tee build.log; then
+              exit 0
+            fi
+            echo "=== ERROR SUMMARY (attempt $i) ==="
+            grep -nE "What went wrong|^e: |error:|Could not (resolve|download|GET)|Caused by|504|503|Read timed out" build.log | head -30 || true
+            sleep 15
+          done
+          exit 1
 
       - name: Verify APK
         run: |
