@@ -15,31 +15,73 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout Repository
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 2. Setup Java 17
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
+      # 3. Setup Exact Gradle Version
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.3.1'
 
-      - name: Grant Gradle Wrapper Permission
-        run: chmod +x gradlew
+      # 4. Generate Debug Keystore
+      - name: Generate Debug Keystore
+        run: |
+          if [ ! -f debug.keystore ]; then
+            keytool -genkeypair \
+              -v \
+              -keystore debug.keystore \
+              -alias androiddebugkey \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass android \
+              -keypass android \
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
 
-      - name: Verify Gradle
-        run: ./gradlew --version
+      # 5. Verify Environment
+      - name: Verify Build Environment
+        run: |
+          java -version
+          gradle --version
+          test -f debug.keystore
 
+      # 6. Build APK
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon
+        run: gradle assembleDebug --no-daemon --stacktrace
 
+      # 7. Verify APK
+      - name: Verify APK
+        run: |
+          APK_PATH="app/build/outputs/apk/debug/app-debug.apk"
+
+          if [ ! -f "$APK_PATH" ]; then
+            echo "ERROR: APK file not found!"
+            exit 1
+          fi
+
+          ls -lh "$APK_PATH"
+
+      # 8. Rename APK
+      - name: Rename APK
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk VYBE.apk
+
+      # 9. Upload APK
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: VYBE-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          name: VYBE
+          path: VYBE.apk
           if-no-files-found: error
+          retention-days: 30
           
