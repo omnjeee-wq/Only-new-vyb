@@ -13,6 +13,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.togetherWith
+import com.example.ui.theme.animation.pressScale
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -639,7 +640,7 @@ fun HeroBanner(
                                 Color.White.copy(alpha = 0.38f),
                                 RoundedCornerShape(24.dp)
                             )
-                            .clickable { onPlayPauseClick() }
+                            .pressScale(pressedScale = 0.92f) { onPlayPauseClick() }
                             .padding(
                                 horizontal = playButtonHorizontalPadding,
                                 vertical = playButtonVerticalPadding

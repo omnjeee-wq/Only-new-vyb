@@ -73,119 +73,118 @@ fun HomeScreen(
                 )
         )
 
-        if (uiState.isLoading) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.primary,
-                    strokeWidth = 3.dp,
-                    modifier = Modifier.size(44.dp)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Crafting your musical vibe...",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 14.sp
-                )
-            }
-        } else if (uiState.errorMessage != null && uiState.sections.isEmpty() && uiState.recommendations.isEmpty()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "Unable to connect to music service",
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = uiState.errorMessage ?: "Please check your internet connection.",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 13.sp,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(20.dp))
-                Button(
-                    onClick = { viewModel.loadHomeData() },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                    shape = RoundedCornerShape(20.dp)
-                ) {
-                    Text("Retry", fontWeight = FontWeight.Bold)
+        val isInitialLoading = uiState.isLoading && uiState.sections.isEmpty() && uiState.recommendations.isEmpty() && uiState.heroSong == null
+        val isError = uiState.errorMessage != null && uiState.sections.isEmpty() && uiState.recommendations.isEmpty()
+
+        androidx.compose.animation.Crossfade(
+            targetState = when {
+                isInitialLoading -> "loading"
+                isError -> "error"
+                else -> "content"
+            },
+            animationSpec = androidx.compose.animation.core.tween(durationMillis = 280),
+            label = "home_content_crossfade"
+        ) { screenState ->
+            when (screenState) {
+                "loading" -> {
+                    com.example.ui.components.skeleton.HomeSkeleton()
                 }
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 120.dp) // Room for floating bar & mini player
-            ) {
-                // Remote Announcement Banner (from silent config update)
-                announcementBanner?.let { banner ->
-                    item(key = "announcement_banner_${banner.id}") {
-                        com.example.ui.components.AnnouncementBanner(
-                            banner = banner,
-                            onDismiss = { com.example.VybeApp.instance.updateManager.dismissAnnouncement() }
+                "error" -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "Unable to connect to music service",
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
                         )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = uiState.errorMessage ?: "Please check your internet connection.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 13.sp,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Button(
+                            onClick = { viewModel.loadHomeData() },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                            shape = RoundedCornerShape(20.dp)
+                        ) {
+                            Text("Retry", fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
-
-                // Cinematic Hero Banner (Positioned edge-to-edge at the very top)
-                item(key = "hero_banner") {
-                    val isHeroCurrent = playerState.currentSong?.id == uiState.heroSong?.id
-                    HeroBanner(
-                        heroSong = uiState.heroSong,
-                        isPlaying = isHeroCurrent && playerState.isPlaying,
-                        onPlayPauseClick = { viewModel.toggleHeroPlayPause() }
-                    )
-                }
-
-                // Recommend For You Section
-                item(key = "recommend_for_you") {
-                    RecommendForYouSection(
-                        songs = uiState.recommendations,
-                        currentPlayingSongId = playerState.currentSong?.id,
-                        isPlaying = playerState.isPlaying,
-                        onSongClick = { song ->
-                            viewModel.playSongWithRadio(song, uiState.recommendations, "Recommend For You")
-                        },
-                        onAddToQueue = { song ->
-                            viewModel.addToQueue(song)
-                        },
-                        onToggleFavorite = { song ->
-                            viewModel.toggleFavorite(song)
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 120.dp) // Room for floating bar & mini player
+                    ) {
+                        // Remote Announcement Banner (from silent config update)
+                        announcementBanner?.let { banner ->
+                            item(key = "announcement_banner_${banner.id}") {
+                                com.example.ui.components.AnnouncementBanner(
+                                    banner = banner,
+                                    onDismiss = { com.example.VybeApp.instance.updateManager.dismissAnnouncement() }
+                                )
+                            }
                         }
-                    )
-                }
 
-                // Categorized Horizontal Sections (Albums & Charts/Playlists)
-                items(
-                    items = uiState.sections,
-                    key = { it.id }
-                ) { section ->
-                    HorizontalSection(
-                        section = section,
-                        currentPlayingSongId = playerState.currentSong?.id,
-                        isPlaying = playerState.isPlaying,
-                        onCollectionClick = { item ->
-                            viewModel.openCollection(item)
-                        },
-                        onPlayCollectionClick = { item ->
-                            viewModel.playCollection(item)
-                        },
-                        onSongClick = { song, list ->
-                            viewModel.playSong(song, list, section.title)
+                        // Cinematic Hero Banner (Positioned edge-to-edge at the very top)
+                        item(key = "hero_banner") {
+                            val isHeroCurrent = playerState.currentSong?.id == uiState.heroSong?.id
+                            HeroBanner(
+                                heroSong = uiState.heroSong,
+                                isPlaying = isHeroCurrent && playerState.isPlaying,
+                                onPlayPauseClick = { viewModel.toggleHeroPlayPause() }
+                            )
                         }
-                    )
+
+                        // Recommend For You Section
+                        item(key = "recommend_for_you") {
+                            RecommendForYouSection(
+                                songs = uiState.recommendations,
+                                currentPlayingSongId = playerState.currentSong?.id,
+                                isPlaying = playerState.isPlaying,
+                                onSongClick = { song ->
+                                    viewModel.playSongWithRadio(song, uiState.recommendations, "Recommend For You")
+                                },
+                                onAddToQueue = { song ->
+                                    viewModel.addToQueue(song)
+                                },
+                                onToggleFavorite = { song ->
+                                    viewModel.toggleFavorite(song)
+                                }
+                            )
+                        }
+
+                        // Categorized Horizontal Sections (Albums & Charts/Playlists)
+                        items(
+                            items = uiState.sections,
+                            key = { it.id }
+                        ) { section ->
+                            HorizontalSection(
+                                section = section,
+                                currentPlayingSongId = playerState.currentSong?.id,
+                                isPlaying = playerState.isPlaying,
+                                onCollectionClick = { item ->
+                                    viewModel.openCollection(item)
+                                },
+                                onPlayCollectionClick = { item ->
+                                    viewModel.playCollection(item)
+                                },
+                                onSongClick = { song, list ->
+                                    viewModel.playSong(song, list, section.title)
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }

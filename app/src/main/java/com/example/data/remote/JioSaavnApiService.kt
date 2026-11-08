@@ -2,6 +2,7 @@ package com.example.data.remote
 
 import com.example.data.model.ApiAlbum
 import com.example.data.model.ApiArtistDetails
+import com.example.data.model.ApiArtistRef
 import com.example.data.model.ApiPlaylist
 import com.example.data.model.ApiResponse
 import com.example.data.model.ApiSearchResult
@@ -33,6 +34,13 @@ interface JioSaavnApiService {
         @Query("page") page: Int = 1,
         @Query("limit") limit: Int = 15
     ): ApiResponse<ApiSearchResult<ApiPlaylist>>
+
+    @GET("api/search/artists")
+    suspend fun searchArtists(
+        @Query("query") query: String,
+        @Query("page") page: Int = 1,
+        @Query("limit") limit: Int = 15
+    ): ApiResponse<ApiSearchResult<ApiArtistRef>>
 
     @GET("api/songs/{id}")
     suspend fun getSongById(

@@ -35,6 +35,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.theme.OutfitFontFamily
 
+import com.example.ui.components.glass.GlassSurface
+import com.example.ui.theme.animation.pressScale
+
 @Composable
 fun SettingsSectionHeader(
     title: String,
@@ -91,15 +94,16 @@ fun SettingsCard(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
-            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(18.dp))
-            .padding(16.dp)
+    GlassSurface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.70f)
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
             content()
         }
     }
@@ -119,7 +123,11 @@ fun SettingsRow(
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .then(
-                if (onClick != null) Modifier.clickable { onClick() } else Modifier
+                if (onClick != null) {
+                    Modifier
+                        .pressScale(0.97f)
+                        .clickable { onClick() }
+                } else Modifier
             )
             .padding(vertical = 10.dp, horizontal = 4.dp)
             .then(

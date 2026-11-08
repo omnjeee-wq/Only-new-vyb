@@ -139,7 +139,7 @@ class LibraryViewModel(
     }
 
     fun closeUserPlaylist() {
-        _uiState.update { it.copy(activeUserPlaylist = null, activeUserPlaylistSongs = emptyList()) }
+        _uiState.update { it.copy(activeUserPlaylist = null, activeUserPlaylistSongs = emptyList(), isDetailLoading = false) }
     }
 
     fun openLikedAlbum(album: Album) {

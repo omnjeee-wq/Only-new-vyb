@@ -2,6 +2,7 @@ package com.example.ui.library
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.background
+import com.example.ui.theme.animation.pressScale
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -73,7 +74,8 @@ fun UserPlaylistDetailContent(
     onAddSongs: () -> Unit,
     onRemoveSong: (String) -> Unit,
     onDeletePlaylist: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isLoading: Boolean = false
 ) {
     val context = LocalContext.current
 
@@ -221,6 +223,7 @@ fun UserPlaylistDetailContent(
                             modifier = Modifier
                                 .weight(1f)
                                 .height(46.dp)
+                                .pressScale(0.95f)
                                 .clip(RoundedCornerShape(24.dp))
                                 .background(
                                     Brush.horizontalGradient(
@@ -246,6 +249,7 @@ fun UserPlaylistDetailContent(
                             modifier = Modifier
                                 .weight(1f)
                                 .height(46.dp)
+                                .pressScale(0.95f)
                                 .testTag("playlist_shuffle")
                         ) {
                             Row(
@@ -268,6 +272,7 @@ fun UserPlaylistDetailContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(42.dp)
+                            .pressScale(0.96f)
                             .testTag("open_add_songs_button")
                     ) {
                         Icon(Icons.Default.Add, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(18.dp))
@@ -277,8 +282,12 @@ fun UserPlaylistDetailContent(
                 }
             }
 
-            // Empty state or Tracklist
-            if (songs.isEmpty()) {
+            // Empty state, Loading skeleton or Tracklist
+            if (isLoading && songs.isEmpty()) {
+                items(6) {
+                    com.example.ui.components.skeleton.UserPlaylistTrackRowSkeleton()
+                }
+            } else if (songs.isEmpty()) {
                 item(key = "empty_playlist") {
                     Column(
                         modifier = Modifier
@@ -318,6 +327,7 @@ fun UserPlaylistDetailContent(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .pressScale(0.98f)
                             .clickable { onPlaySong(song) }
                             .padding(horizontal = 20.dp, vertical = 8.dp)
                             .testTag("playlist_track_${song.id}"),

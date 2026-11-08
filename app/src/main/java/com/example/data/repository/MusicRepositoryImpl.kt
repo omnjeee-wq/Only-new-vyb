@@ -11,6 +11,7 @@ import com.example.data.local.UserPlaylistEntity
 import com.example.data.local.UserPlaylistSongEntity
 import com.example.data.remote.JioSaavnApiService
 import com.example.domain.model.Album
+import com.example.domain.model.Artist
 import com.example.domain.model.HomeSection
 import com.example.domain.model.ListeningEventType
 import com.example.domain.model.Playlist
@@ -381,6 +382,24 @@ class MusicRepositoryImpl(
                 )
             } ?: emptyList()
             Result.success(playlists)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun searchArtists(query: String, limit: Int): Result<List<Artist>> = withContext(Dispatchers.IO) {
+        try {
+            val response = apiService.searchArtists(query = query, limit = limit)
+            val artists = response.data?.results?.map {
+                Artist(
+                    id = it.id.orEmpty(),
+                    name = MusicUtils.unescapeHtml(it.name.orEmpty()),
+                    role = it.role.orEmpty().ifBlank { "Artist" },
+                    artworkUrl = MusicUtils.selectBestImage(it.image),
+                    type = it.type.orEmpty().ifBlank { "artist" }
+                )
+            } ?: emptyList()
+            Result.success(artists)
         } catch (e: Exception) {
             Result.failure(e)
         }

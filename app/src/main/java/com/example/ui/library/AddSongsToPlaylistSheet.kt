@@ -149,13 +149,13 @@ fun AddSongsToPlaylistSheet(
             )
 
             if (isSearching) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(32.dp),
-                    contentAlignment = Alignment.Center
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp)
                 ) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
+                    items(5) {
+                        com.example.ui.components.skeleton.AddSongRowSkeleton()
+                    }
                 }
             } else if (candidateSongs.isEmpty()) {
                 Box(

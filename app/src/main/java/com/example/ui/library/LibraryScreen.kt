@@ -2,8 +2,12 @@ package com.example.ui.library
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.core.tween
+import com.example.ui.theme.animation.MotionSpecs
+import com.example.ui.theme.animation.pressScale
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -115,6 +119,7 @@ fun LibraryScreen(
             songs = uiState.activeUserPlaylistSongs,
             currentPlayingSongId = playerState.currentSong?.id,
             isPlaying = playerState.isPlaying,
+            isLoading = uiState.isDetailLoading,
             onBack = { viewModel.closeUserPlaylist() },
             onPlayAll = {
                 viewModel.playAll(uiState.activeUserPlaylistSongs, uiState.activeUserPlaylist!!.title)
@@ -331,10 +336,22 @@ private fun LibraryCategoryChip(
     selected: Boolean,
     onClick: () -> Unit
 ) {
+    val bgColor by animateColorAsState(
+        targetValue = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+        animationSpec = tween(MotionSpecs.MicroDuration),
+        label = "chip_bg"
+    )
+    val textColor by animateColorAsState(
+        targetValue = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+        animationSpec = tween(MotionSpecs.MicroDuration),
+        label = "chip_text"
+    )
+
     Box(
         modifier = Modifier
+            .pressScale(0.95f)
             .clip(RoundedCornerShape(20.dp))
-            .background(if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
+            .background(bgColor)
             .clickable { onClick() }
             .padding(horizontal = 14.dp, vertical = 8.dp)
             .testTag("library_tab_${label.take(6).lowercase()}"),
@@ -342,7 +359,7 @@ private fun LibraryCategoryChip(
     ) {
         Text(
             text = label,
-            color = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+            color = textColor,
             fontSize = 13.sp,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
         )
@@ -429,6 +446,7 @@ private fun LibraryOverviewContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .pressScale(0.97f)
                     .clip(RoundedCornerShape(16.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant)
                     .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
@@ -465,6 +483,7 @@ private fun LibraryHeroCard(
         modifier = Modifier
             .fillMaxWidth()
             .height(100.dp)
+            .pressScale(0.96f)
             .clip(RoundedCornerShape(20.dp))
             .background(Brush.linearGradient(gradient))
             .clickable { onClick() }
@@ -531,6 +550,7 @@ private fun LibrarySquareCard(
     Box(
         modifier = modifier
             .height(120.dp)
+            .pressScale(0.95f)
             .clip(RoundedCornerShape(20.dp))
             .background(Brush.linearGradient(gradient))
             .clickable { onClick() }

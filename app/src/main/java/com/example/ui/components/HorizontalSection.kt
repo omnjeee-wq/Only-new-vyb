@@ -2,6 +2,7 @@ package com.example.ui.components
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.background
+import com.example.ui.theme.animation.pressScale
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -160,7 +161,7 @@ private fun CollectionSquareCard(
         modifier = Modifier
             .width(size)
             .clip(shape)
-            .clickable { onClick() }
+            .pressScale(pressedScale = 0.94f) { onClick() }
             .testTag("collection_card_${item.id}")
     ) {
         Box(
@@ -254,7 +255,7 @@ private fun SongSquareCard(
         modifier = Modifier
             .width(size)
             .clip(shape)
-            .clickable { onClick() }
+            .pressScale(pressedScale = 0.94f) { onClick() }
             .testTag("song_card_${song.id}")
     ) {
         Box(

@@ -43,6 +43,14 @@ data class Playlist(
     val description: String = ""
 )
 
+data class Artist(
+    val id: String,
+    val name: String,
+    val role: String = "Artist",
+    val artworkUrl: String = "",
+    val type: String = "artist"
+)
+
 enum class SectionItemType {
     ALBUM,
     PLAYLIST,

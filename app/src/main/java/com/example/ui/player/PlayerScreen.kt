@@ -5,11 +5,18 @@ import android.content.Context
 import android.content.Intent
 import android.text.Html
 import android.net.Uri
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.ui.graphics.graphicsLayer
+import com.example.ui.theme.animation.pressScale
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -306,6 +313,7 @@ fun PlayerScreen(
                     modifier = Modifier
                         .size(40.dp)
                         .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f), CircleShape)
+                        .pressScale()
                         .testTag("collapse_player_button")
                 ) {
                     Icon(
@@ -342,6 +350,7 @@ fun PlayerScreen(
                         modifier = Modifier
                             .size(40.dp)
                             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f), CircleShape)
+                            .pressScale()
                             .testTag("player_options_button")
                     ) {
                         Icon(
@@ -433,7 +442,7 @@ fun PlayerScreen(
                 }
             }
 
-            // CENTER ARTWORK
+            // CENTER ARTWORK WITH SMOOTH CROSSFADE
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -448,27 +457,33 @@ fun PlayerScreen(
                     .background(MaterialTheme.colorScheme.surfaceVariant)
                     .testTag("player_artwork")
             ) {
-                if (currentSong != null) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(context)
-                            .data(currentSong.artworkUrl)
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = currentSong.title,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.PlayArrow,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(64.dp)
+                androidx.compose.animation.Crossfade(
+                    targetState = currentSong?.artworkUrl,
+                    animationSpec = androidx.compose.animation.core.tween(260),
+                    label = "player_artwork_crossfade"
+                ) { artUrl ->
+                    if (!artUrl.isNullOrBlank()) {
+                        AsyncImage(
+                            model = ImageRequest.Builder(context)
+                                .data(artUrl)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = currentSong?.title,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
                         )
+                    } else {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PlayArrow,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(64.dp)
+                            )
+                        }
                     }
                 }
 
@@ -485,7 +500,7 @@ fun PlayerScreen(
                 }
             }
 
-            // TRACK METADATA & FAVORITE BUTTON
+            // TRACK METADATA & FAVORITE BUTTON WITH SPRING FEEDBACK
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -515,10 +530,20 @@ fun PlayerScreen(
                     )
                 }
 
+                val favScale by animateFloatAsState(
+                    targetValue = if (isLiked) 1.16f else 1.0f,
+                    animationSpec = androidx.compose.animation.core.spring(
+                        dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
+                        stiffness = androidx.compose.animation.core.Spring.StiffnessMedium
+                    ),
+                    label = "fav_pop_scale"
+                )
+
                 IconButton(
                     onClick = { currentSong?.let { onToggleFavorite(it) } },
                     modifier = Modifier
                         .size(44.dp)
+                        .pressScale()
                         .testTag("player_favorite_button")
                 ) {
                     Icon(
@@ -533,7 +558,12 @@ fun PlayerScreen(
                         } else {
                             MaterialTheme.colorScheme.onSurfaceVariant
                         },
-                        modifier = Modifier.size(28.dp)
+                        modifier = Modifier
+                            .size(28.dp)
+                            .graphicsLayer {
+                                scaleX = favScale
+                                scaleY = favScale
+                            }
                     )
                 }
             }
@@ -568,7 +598,9 @@ fun PlayerScreen(
                 // Shuffle
                 IconButton(
                     onClick = { playerManager.toggleShuffle() },
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier
+                        .size(40.dp)
+                        .pressScale()
                 ) {
                     Icon(
                         imageVector = Icons.Default.Shuffle,
@@ -585,7 +617,9 @@ fun PlayerScreen(
                 // Previous
                 IconButton(
                     onClick = { playerManager.previous() },
-                    modifier = Modifier.size(48.dp)
+                    modifier = Modifier
+                        .size(48.dp)
+                        .pressScale()
                 ) {
                     Icon(
                         imageVector = Icons.Default.SkipPrevious,
@@ -595,16 +629,16 @@ fun PlayerScreen(
                     )
                 }
 
-                // Main Play/Pause Button with Pulsing Glow
+                // Main Play/Pause Button with Pulsing Glow and Spring Scale
                 Box(
                     modifier = Modifier
                         .size(68.dp)
                         .pulsingGlow(
                             color = MaterialTheme.colorScheme.primary,
-                            minRadius = 10.dp,
-                            maxRadius = 22.dp,
-                            minAlpha = 0.35f,
-                            maxAlpha = 0.85f
+                            minRadius = 8.dp,
+                            maxRadius = 18.dp,
+                            minAlpha = 0.25f,
+                            maxAlpha = 0.65f
                         )
                         .clip(CircleShape)
                         .background(
@@ -614,29 +648,42 @@ fun PlayerScreen(
                         )
                         .border(
                             1.5.dp,
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
+                            Color.White.copy(alpha = 0.40f),
                             CircleShape
                         )
-                        .clickable { playerManager.togglePlayPause() }
+                        .pressScale(pressedScale = 0.90f) {
+                            playerManager.togglePlayPause()
+                        }
                         .testTag("player_play_pause_button"),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = if (playerState.isPlaying) {
-                            Icons.Default.Pause
-                        } else {
-                            Icons.Default.PlayArrow
+                    AnimatedContent(
+                        targetState = playerState.isPlaying,
+                        transitionSpec = {
+                            (androidx.compose.animation.fadeIn(tween(140)) + androidx.compose.animation.scaleIn(initialScale = 0.8f, animationSpec = tween(140))) togetherWith
+                                    (androidx.compose.animation.fadeOut(tween(140)) + androidx.compose.animation.scaleOut(targetScale = 0.8f, animationSpec = tween(140)))
                         },
-                        contentDescription = if (playerState.isPlaying) "Pause" else "Play",
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(34.dp)
-                    )
+                        label = "player_play_pause_icon"
+                    ) { isPlaying ->
+                        Icon(
+                            imageVector = if (isPlaying) {
+                                Icons.Default.Pause
+                            } else {
+                                Icons.Default.PlayArrow
+                            },
+                            contentDescription = if (isPlaying) "Pause" else "Play",
+                            tint = Color.White,
+                            modifier = Modifier.size(34.dp)
+                        )
+                    }
                 }
 
                 // Next
                 IconButton(
                     onClick = { playerManager.next() },
-                    modifier = Modifier.size(48.dp)
+                    modifier = Modifier
+                        .size(48.dp)
+                        .pressScale()
                 ) {
                     Icon(
                         imageVector = Icons.Default.SkipNext,
@@ -649,7 +696,9 @@ fun PlayerScreen(
                 // Repeat Mode
                 IconButton(
                     onClick = { playerManager.cycleRepeatMode() },
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier
+                        .size(40.dp)
+                        .pressScale()
                 ) {
                     val icon = if (playerState.repeatMode == Player.REPEAT_MODE_ONE) {
                         Icons.Default.RepeatOne
@@ -687,7 +736,7 @@ fun PlayerScreen(
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
                         .background(MaterialTheme.colorScheme.surface)
-                        .clickable { showLyricsSheet = true }
+                        .pressScale { showLyricsSheet = true }
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                         .testTag("lyrics_button"),
                     verticalAlignment = Alignment.CenterVertically,
@@ -712,7 +761,7 @@ fun PlayerScreen(
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
                         .background(MaterialTheme.colorScheme.surface)
-                        .clickable { showQueueSheet = true }
+                        .pressScale { showQueueSheet = true }
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                         .testTag("queue_button"),
                     verticalAlignment = Alignment.CenterVertically,
@@ -960,23 +1009,11 @@ fun PlayerScreen(
                             item {
                                 when {
                                     lyricsLoading -> {
-                                        Column(
+                                        com.example.ui.components.skeleton.LyricsSkeleton(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(top = 60.dp),
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            CircularProgressIndicator(
-                                                color = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.size(34.dp)
-                                            )
-                                            Spacer(modifier = Modifier.height(14.dp))
-                                            Text(
-                                                text = "Loading lyrics…",
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                fontSize = 14.sp
-                                            )
-                                        }
+                                                .padding(top = 16.dp)
+                                        )
                                     }
 
                                     lyricsError != null -> {

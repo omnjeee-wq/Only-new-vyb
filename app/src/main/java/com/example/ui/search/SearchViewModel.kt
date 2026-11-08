@@ -2,30 +2,48 @@ package com.example.ui.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.domain.model.Album
+import com.example.domain.model.Artist
+import com.example.domain.model.Playlist
 import com.example.domain.model.SectionItem
 import com.example.domain.model.SectionItemType
 import com.example.domain.model.Song
 import com.example.domain.repository.MusicRepository
+import com.example.player.PlayerManager
+import com.example.ui.home.CollectionDetailState
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import com.example.player.PlayerManager
-import com.example.ui.home.CollectionDetailState
+
+enum class SearchCategory(val displayName: String) {
+    ALL("All"),
+    SONGS("Songs"),
+    PLAYLISTS("Playlists"),
+    ALBUMS("Albums"),
+    ARTISTS("Artists")
+}
 
 sealed interface SearchUiState {
     data object Idle : SearchUiState
     data object Loading : SearchUiState
     data class Success(
         val query: String,
-        val songs: List<Song>,
-        val collections: List<SectionItem> = emptyList(),
-        val selectedCollection: CollectionDetailState? = null
+        val songs: List<Song> = emptyList(),
+        val albums: List<Album> = emptyList(),
+        val playlists: List<Playlist> = emptyList(),
+        val artists: List<Artist> = emptyList(),
+        val selectedCategory: SearchCategory = SearchCategory.ALL,
+        val selectedCollection: CollectionDetailState? = null,
+        val selectedArtistTopSongs: List<Song>? = null,
+        val isArtistLoading: Boolean = false,
+        // Kept for backward compatibility with existing tests
+        val collections: List<SectionItem> = emptyList()
     ) : SearchUiState
-    data class Empty(val query: String) : SearchUiState
+    data class Empty(val query: String, val category: SearchCategory = SearchCategory.ALL) : SearchUiState
     data class Error(val message: String) : SearchUiState
 }
 
@@ -56,9 +74,10 @@ class SearchViewModel(
     }
 
     /**
-     * Executes the song search ONLY when the user explicitly triggers it
-     * by pressing Enter (IME Search action), tapping Search icon, or clicking a history item.
-     * Searches are only saved to history at this exact moment.
+     * Executes the search across songs, albums, playlists, and artists
+     * ONLY when the user explicitly triggers it by pressing Enter (IME Search action),
+     * tapping Search icon, or clicking a history item.
+     * Results are cached for the query so switching category tabs does not re-fetch.
      */
     fun performSearch(queryToSearch: String? = null) {
         val targetQuery = (queryToSearch ?: _query.value).trim()
@@ -72,19 +91,25 @@ class SearchViewModel(
             repository.saveSearchQuery(targetQuery)
 
             try {
-                // Search songs + albums + playlists together so the top of the
-                // results can surface collections without changing the existing song search.
+                // Search songs + albums + playlists + artists concurrently
                 val songsDeferred = async { repository.searchSongs(targetQuery, limit = 40) }
-                val albumsDeferred = async { repository.searchAlbums(targetQuery, limit = 6) }
-                val playlistsDeferred = async { repository.searchPlaylists(targetQuery, limit = 6) }
+                val albumsDeferred = async { repository.searchAlbums(targetQuery, limit = 20) }
+                val playlistsDeferred = async { repository.searchPlaylists(targetQuery, limit = 20) }
+                val artistsDeferred = async { repository.searchArtists(targetQuery, limit = 15) }
 
                 val songsResult = songsDeferred.await()
                 val albumsResult = albumsDeferred.await()
                 val playlistsResult = playlistsDeferred.await()
+                val artistsResult = artistsDeferred.await()
 
                 val songs = songsResult.getOrNull().orEmpty()
+                val albums = albumsResult.getOrNull().orEmpty()
+                val playlists = playlistsResult.getOrNull().orEmpty()
+                val artists = artistsResult.getOrNull().orEmpty()
+
+                // Backward compatibility SectionItem collections for any legacy test or view
                 val collections = buildList {
-                    albumsResult.getOrNull().orEmpty().take(2).forEach { album ->
+                    albums.take(2).forEach { album ->
                         add(
                             SectionItem(
                                 id = album.id,
@@ -98,7 +123,7 @@ class SearchViewModel(
                             )
                         )
                     }
-                    playlistsResult.getOrNull().orEmpty().take(2).forEach { playlist ->
+                    playlists.take(2).forEach { playlist ->
                         add(
                             SectionItem(
                                 id = playlist.id,
@@ -113,12 +138,16 @@ class SearchViewModel(
                     }
                 }.take(3)
 
-                if (songs.isEmpty() && collections.isEmpty()) {
-                    _uiState.value = SearchUiState.Empty(targetQuery)
+                if (songs.isEmpty() && albums.isEmpty() && playlists.isEmpty() && artists.isEmpty()) {
+                    _uiState.value = SearchUiState.Empty(targetQuery, SearchCategory.ALL)
                 } else {
                     _uiState.value = SearchUiState.Success(
                         query = targetQuery,
                         songs = songs,
+                        albums = albums,
+                        playlists = playlists,
+                        artists = artists,
+                        selectedCategory = SearchCategory.ALL,
                         collections = collections
                     )
                 }
@@ -126,6 +155,19 @@ class SearchViewModel(
                 _uiState.value = SearchUiState.Error(
                     error.localizedMessage ?: "Failed to search. Please check your network and try again."
                 )
+            }
+        }
+    }
+
+    /**
+     * Category filtering does NOT re-execute search API requests.
+     * It simply updates the selectedCategory within the current Success state.
+     */
+    fun selectCategory(category: SearchCategory) {
+        val current = _uiState.value
+        if (current is SearchUiState.Success) {
+            if (current.selectedCategory != category) {
+                _uiState.value = current.copy(selectedCategory = category)
             }
         }
     }
@@ -152,44 +194,82 @@ class SearchViewModel(
         _uiState.value = SearchUiState.Idle
     }
 
-     
-     fun playSongWithRadio(
-    song: Song,
-    playerManager: PlayerManager,
-    fallbackPlaylist: List<Song>,
-    playlistName: String
-) {
-    // First play the selected song immediately
-    playerManager.playSong(
-        song = song,
-        playlist = listOf(song),
-        playlistName = playlistName
-    )
+    fun playSongWithRadio(
+        song: Song,
+        playerManager: PlayerManager,
+        fallbackPlaylist: List<Song>,
+        playlistName: String
+    ) {
+        // First play the selected song immediately
+        playerManager.playSong(
+            song = song,
+            playlist = listOf(song),
+            playlistName = playlistName
+        )
 
-    viewModelScope.launch {
-        repository.getRadioQueue(song.id, limit = 10).onSuccess { radioSongs ->
+        viewModelScope.launch {
+            repository.getRadioQueue(song.id, limit = 10).onSuccess { radioSongs ->
+                val searchResultIds = fallbackPlaylist
+                    .map { it.id }
+                    .toSet()
 
-            // IDs of songs already visible in search results
-            val searchResultIds = fallbackPlaylist
-                .map { it.id }
-                .toSet()
+                val recommendations = radioSongs
+                    .filter { it.id != song.id }
+                    .filterNot { it.id in searchResultIds }
+                    .distinctBy { it.id }
 
-            // Keep only genuinely different songs
-            val recommendations = radioSongs
-                .filter { it.id != song.id }
-                .filterNot { it.id in searchResultIds }
-                .distinctBy { it.id }
-
-            if (recommendations.isNotEmpty()) {
-                playerManager.replaceUpcomingQueue(
-                    currentSong = song,
-                    newQueue = recommendations
-                )
+                if (recommendations.isNotEmpty()) {
+                    playerManager.replaceUpcomingQueue(
+                        currentSong = song,
+                        newQueue = recommendations
+                    )
+                }
             }
         }
     }
-     }
-     
+
+    fun openAlbum(album: Album) {
+        openCollection(
+            SectionItem(
+                id = album.id,
+                title = album.title,
+                subtitle = if (album.year.isNotBlank()) "Album • ${album.year}" else "Album",
+                artworkUrl = album.artworkUrl,
+                type = SectionItemType.ALBUM,
+                songCount = album.songCount,
+                year = album.year,
+                language = album.language
+            )
+        )
+    }
+
+    fun openPlaylist(playlist: Playlist) {
+        openCollection(
+            SectionItem(
+                id = playlist.id,
+                title = playlist.title,
+                subtitle = playlist.subtitle.ifBlank { "Playlist" },
+                artworkUrl = playlist.artworkUrl,
+                type = SectionItemType.PLAYLIST,
+                songCount = playlist.songCount,
+                language = playlist.language
+            )
+        )
+    }
+
+    fun openArtist(artist: Artist) {
+        openCollection(
+            SectionItem(
+                id = artist.id,
+                title = artist.name,
+                subtitle = artist.role.ifBlank { "Artist" },
+                artworkUrl = artist.artworkUrl,
+                type = SectionItemType.CHART,
+                songCount = 0
+            )
+        )
+    }
+
     fun openCollection(item: SectionItem) {
         val current = _uiState.value
         if (current !is SearchUiState.Success) return
@@ -201,7 +281,8 @@ class SearchViewModel(
         viewModelScope.launch {
             val result = when (item.type) {
                 SectionItemType.ALBUM -> repository.getAlbumDetails(item.id).map { it.songs }
-                SectionItemType.PLAYLIST, SectionItemType.CHART -> repository.getPlaylistDetails(item.id).map { it.songs }
+                SectionItemType.PLAYLIST -> repository.getPlaylistDetails(item.id).map { it.songs }
+                SectionItemType.CHART -> repository.getArtistTopSongs(item.id)
             }
 
             val latest = _uiState.value

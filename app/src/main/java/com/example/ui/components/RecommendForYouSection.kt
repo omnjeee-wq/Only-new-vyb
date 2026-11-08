@@ -2,6 +2,7 @@ package com.example.ui.components
 
 import androidx.compose.material3.MaterialTheme
 import android.content.Context
+import com.example.ui.theme.animation.pressScale
 import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -182,7 +183,7 @@ private fun RecommendSongItem(
                 if (isCurrent) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
                 RoundedCornerShape(12.dp)
             )
-            .clickable { onClick() }
+            .pressScale(pressedScale = 0.97f) { onClick() }
             .padding(8.dp)
             .testTag("recommend_song_${song.id}"),
         verticalAlignment = Alignment.CenterVertically

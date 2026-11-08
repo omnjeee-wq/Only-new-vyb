@@ -302,19 +302,9 @@ fun CollectionDetailSheet(
                 }
 
                 // Songs Tracklist
-                if (state.isLoading) {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(160.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(36.dp)
-                            )
-                        }
+                if (state.isLoading && state.songs.isEmpty()) {
+                    items(6) {
+                        com.example.ui.components.skeleton.CollectionTrackRowSkeleton()
                     }
                 } else if (state.songs.isEmpty()) {
                     item {

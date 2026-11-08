@@ -44,11 +44,12 @@ val GlowEmerald = Color(0xFF10B981)
 
 /**
  * Draws a soft, radiant blurred glow behind any composable element.
+ * Refined for an Apple-inspired ambient radiance with tasteful alpha.
  */
 fun Modifier.neonGlow(
     color: Color = GlowOrange,
-    radius: Dp = 16.dp,
-    alpha: Float = 0.55f,
+    radius: Dp = 12.dp,
+    alpha: Float = 0.32f,
     cornerRadius: Dp = 0.dp
 ): Modifier = this.drawBehind {
     val glowColor = color.copy(alpha = alpha)
@@ -90,11 +91,11 @@ fun Modifier.neonGlow(
 @Composable
 fun Modifier.pulsingGlow(
     color: Color = GlowOrange,
-    minRadius: Dp = 10.dp,
-    maxRadius: Dp = 22.dp,
-    minAlpha: Float = 0.25f,
-    maxAlpha: Float = 0.70f,
-    durationMs: Int = 1600,
+    minRadius: Dp = 8.dp,
+    maxRadius: Dp = 16.dp,
+    minAlpha: Float = 0.15f,
+    maxAlpha: Float = 0.45f,
+    durationMs: Int = 1800,
     cornerRadius: Dp = 0.dp
 ): Modifier {
     val infiniteTransition = rememberInfiniteTransition(label = "pulsing_glow")

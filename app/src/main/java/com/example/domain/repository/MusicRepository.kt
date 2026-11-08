@@ -1,6 +1,7 @@
 package com.example.domain.repository
 
 import com.example.domain.model.Album
+import com.example.domain.model.Artist
 import com.example.domain.model.HomeSection
 import com.example.domain.model.ListeningEventType
 import com.example.domain.model.Playlist
@@ -16,6 +17,7 @@ interface MusicRepository {
     suspend fun searchSongs(query: String, limit: Int = 15): Result<List<Song>>
     suspend fun searchAlbums(query: String, limit: Int = 10): Result<List<Album>>
     suspend fun searchPlaylists(query: String, limit: Int = 10): Result<List<Playlist>>
+    suspend fun searchArtists(query: String, limit: Int = 10): Result<List<Artist>> = Result.success(emptyList())
     suspend fun getAlbumDetails(albumId: String): Result<Album>
     suspend fun getPlaylistDetails(playlistId: String): Result<Playlist>
     suspend fun getArtistTopSongs(artistId: String): Result<List<Song>>
