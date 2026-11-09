@@ -141,7 +141,7 @@ fun HeroBanner(
     val artistInfo = remember(heroSong?.artist) { parseArtists(heroSong?.artist.orEmpty(), limit = 3) }
     val infoLine = remember(heroSong?.id, titleParts) {
         val first = titleParts.sub
-            ?: heroSong?.album?.takeIf { it.isNotBlank() && !it.equals(titleParts.main, ignoreCase = true) }
+            ?: heroSong?.album?.let { splitTitle(it).main }?.takeIf { it.isNotBlank() && !it.equals(titleParts.main, ignoreCase = true) }
         listOfNotNull(first, heroSong?.year?.takeIf { it.isNotBlank() }).joinToString("  •  ")
     }
 
@@ -161,7 +161,7 @@ fun HeroBanner(
         val bannerHeight = if (sideBySide) {
             (w * 0.72f).coerceIn(430.dp, 520.dp)
         } else {
-            (w * 0.86f).coerceIn(340.dp, 420.dp)
+            (w * 0.94f).coerceIn(370.dp, 450.dp)
         }
         val hPad = when {
             isCompactNarrow -> 14.dp
@@ -169,10 +169,10 @@ fun HeroBanner(
             sideBySide -> 32.dp
             else -> 22.dp
         }
-        val arcHeight = if (sideBySide) 52.dp else 64.dp
+        val arcHeight = if (sideBySide) 52.dp else 104.dp
         val orbSize = if (isCompactNarrow) 48.dp else 56.dp
         val textMaxWidth = if (sideBySide) w * 0.56f else w - hPad * 2
-        val separatorHeight = if (isCompactNarrow) 24.dp else if (isCompact) 32.dp else 44.dp
+        val separatorHeight = if (!sideBySide) 2.dp else if (isCompactNarrow) 24.dp else if (isCompact) 32.dp else 44.dp
 
         Column(modifier = Modifier.fillMaxWidth()) {
             Box(
@@ -223,11 +223,19 @@ fun HeroBanner(
                 }
 
                 // 3. Curved bottom edge in the app background colour (with a soft violet rim)
-                BottomArc(
-                    height = arcHeight,
-                    background = screenBackground,
-                    modifier = Modifier.align(Alignment.BottomCenter)
-                )
+                if (sideBySide) {
+                    BottomArc(
+                        height = arcHeight,
+                        background = screenBackground,
+                        modifier = Modifier.align(Alignment.BottomCenter)
+                    )
+                } else {
+                    PhoneWave(
+                        height = arcHeight,
+                        background = screenBackground,
+                        modifier = Modifier.align(Alignment.BottomCenter)
+                    )
+                }
 
                 // 4. Foreground
                 Column(
@@ -238,7 +246,7 @@ fun HeroBanner(
                             start = hPad,
                             end = hPad,
                             top = if (isCompact) 8.dp else 10.dp,
-                            bottom = if (sideBySide) arcHeight * 0.8f else 14.dp
+                            bottom = if (sideBySide) arcHeight * 0.8f else 12.dp
                         ),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -253,7 +261,7 @@ fun HeroBanner(
                             .weight(1f)
                             .fillMaxWidth()
                     ) {
-                        val titleBudget = (maxHeight - (if (sideBySide) 224.dp else 150.dp)).coerceAtLeast(60.dp)
+                        val titleBudget = (maxHeight - (if (sideBySide) 224.dp else 168.dp)).coerceAtLeast(60.dp)
                         val waveWidth = if (sideBySide) textMaxWidth else w - hPad * 2 - orbSize - 12.dp
 
                         if (!sideBySide) {
@@ -263,6 +271,7 @@ fun HeroBanner(
                                     .widthIn(max = textMaxWidth),
                                 mainTitle = titleParts.main.ifBlank { "Discover your vibe" },
                                 infoLine = infoLine,
+                                infoMaxWidth = w * 0.62f,
                                 artists = artistInfo.first,
                                 extraArtists = artistInfo.second,
                                 isPlaying = isPlaying,
@@ -586,6 +595,7 @@ private fun PhoneInfoColumn(
     modifier: Modifier,
     mainTitle: String,
     infoLine: String,
+    infoMaxWidth: Dp,
     artists: List<String>,
     extraArtists: Int,
     isPlaying: Boolean,
@@ -667,6 +677,7 @@ private fun PhoneInfoColumn(
         if (infoLine.isNotBlank()) {
             Spacer(Modifier.height(3.dp))
             Text(
+                modifier = Modifier.widthIn(max = infoMaxWidth),
                 text = infoLine,
                 color = Color.White.copy(alpha = 0.62f),
                 fontSize = if (compactNarrow) 12.sp else 13.sp,
@@ -677,7 +688,8 @@ private fun PhoneInfoColumn(
             )
         }
 
-        Spacer(Modifier.height(12.dp))
+        // Room for the glowing wave to run between the text and the buttons
+        Spacer(Modifier.height(30.dp))
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -1055,6 +1067,81 @@ private fun FeatheredArtwork(url: String, modifier: Modifier = Modifier, wideVie
                 )
             }
     )
+}
+
+/**
+ * Premium glowing wave for the phone layout: a violet haze that melts into the app background,
+ * a bright swelling rim (soft glow built from stacked strokes) and two thinner ribbons beneath it.
+ * The rim stays above the button row, like in the design mockup.
+ */
+@Composable
+private fun PhoneWave(height: Dp, background: Color, modifier: Modifier = Modifier) {
+    Canvas(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(height)
+    ) {
+        val w = size.width
+        val h = size.height
+
+        fun ribbon(dy: Float): Path = Path().apply {
+            moveTo(0f, h * 0.31f + dy)
+            cubicTo(w * 0.15f, h * 0.38f + dy, w * 0.32f, h * 0.40f + dy, w * 0.48f, h * 0.33f + dy)
+            cubicTo(w * 0.64f, h * 0.26f + dy, w * 0.74f, h * 0.06f + dy, w * 0.90f, h * 0.06f + dy)
+            cubicTo(w * 0.95f, h * 0.06f + dy, w * 0.98f, h * 0.07f + dy, w, h * 0.08f + dy)
+        }
+
+        // Light bloom above the swell
+        drawRect(
+            brush = Brush.radialGradient(
+                0f to BrandMagenta.copy(alpha = 0.30f),
+                0.6f to BrandPurple.copy(alpha = 0.10f),
+                1f to Color.Transparent,
+                center = Offset(w * 0.86f, h * 0.10f),
+                radius = w * 0.60f
+            )
+        )
+
+        // Violet haze under the rim, fading into the screen background
+        val filled = ribbon(0f).apply {
+            lineTo(w, h)
+            lineTo(0f, h)
+            close()
+        }
+        drawPath(
+            path = filled,
+            brush = Brush.verticalGradient(
+                0f to BrandPurple.copy(alpha = 0.46f),
+                0.38f to Color(0xFF3A1673).copy(alpha = 0.60f),
+                0.78f to background.copy(alpha = 0.94f),
+                1f to background
+            )
+        )
+
+        val rimBrush = Brush.horizontalGradient(
+            0f to Color.Transparent,
+            0.07f to BrandPurple.copy(alpha = 0.85f),
+            0.50f to BrandMagenta,
+            0.86f to Color(0xFFE2B8FF),
+            1f to Color.Transparent
+        )
+        val pinkBrush = Brush.horizontalGradient(
+            0f to Color.Transparent,
+            0.10f to BrandMagenta.copy(alpha = 0.7f),
+            0.60f to BrandPink,
+            1f to Color.Transparent
+        )
+
+        // Soft glow = a few wide, faint strokes under the sharp core line
+        listOf(18.dp to 0.06f, 11.dp to 0.10f, 6.dp to 0.18f).forEach { (width, alpha) ->
+            drawPath(ribbon(0f), brush = rimBrush, alpha = alpha, style = Stroke(width = width.toPx(), cap = StrokeCap.Round))
+        }
+        drawPath(ribbon(0f), brush = rimBrush, style = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round))
+
+        // Secondary ribbons for depth
+        drawPath(ribbon(7.dp.toPx()), brush = pinkBrush, alpha = 0.55f, style = Stroke(width = 1.dp.toPx(), cap = StrokeCap.Round))
+        drawPath(ribbon(14.dp.toPx()), brush = rimBrush, alpha = 0.25f, style = Stroke(width = 0.8.dp.toPx(), cap = StrokeCap.Round))
+    }
 }
 
 @Composable
