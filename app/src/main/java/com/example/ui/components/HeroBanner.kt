@@ -61,6 +61,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -121,8 +122,9 @@ private val BrandPink = Color(0xFFFF4FD8)
  * Layers (bottom -> top):
  *  1. [CinematicBackdrop]  adaptive blurred background generated from the artwork
  *  2. feathered sharp artwork (blends into the backdrop, no visible edges)
- *  3. curved bottom edge that melts into the app background
- *  4. foreground: top bar (unchanged), title, artists, actions, waveform, play orb
+ *  3. bottom edge that melts into the app background (arc on tablets, clean straight
+ *     cut with a soft violet rim + one calm wave line on phones)
+ *  4. foreground: top bar, title, artists, actions, waveform, play orb
  */
 @Composable
 fun HeroBanner(
@@ -222,7 +224,9 @@ fun HeroBanner(
                     }
                 }
 
-                // 3. Curved bottom edge in the app background colour (with a soft violet rim)
+                // 3. Bottom edge in the app background colour.
+                //    Tablet: curved arc (unchanged). Phone: clean straight cut + soft violet rim
+                //    + one calm full-width wave line (never touches the canvas borders).
                 if (sideBySide) {
                     BottomArc(
                         height = arcHeight,
@@ -230,7 +234,7 @@ fun HeroBanner(
                         modifier = Modifier.align(Alignment.BottomCenter)
                     )
                 } else {
-                    PhoneWave(
+                    PhoneBottomEdge(
                         height = arcHeight,
                         background = screenBackground,
                         isPlaying = isPlaying,
@@ -1071,21 +1075,16 @@ private fun FeatheredArtwork(url: String, modifier: Modifier = Modifier, wideVie
 }
 
 /**
- * Premium glowing wave for the phone layout: a violet haze that melts into the app background,
- * a bright swelling rim (soft glow built from stacked strokes) and two thinner ribbons beneath it.
- * The rim stays above the button row, like in the design mockup.
- */
-/**
- * Phone-only aurora ribbon.
+ * Phone-only bottom edge, matching the design mockup.
  *
- * The fade is painted as a continuous vertical blend into the app background (rather than
- * filling below a hard-edged wave), preventing the visible dark strip at the banner boundary.
- * The ribbon is built from layered cubic paths: a broad low-alpha bloom, two translucent
- * silk strands, and a fine luminous core. Motion is deliberately restrained and only runs
- * while the featured song is playing.
+ * The artwork melts into the app background with a clean straight cut (short soft blend, no
+ * opaque rectangle edge and no dark strip at the banner boundary). A soft violet glow rim runs
+ * along the cut, and a single calm full-width wave line floats above it. Every stroke stays
+ * well inside the canvas (the wave occupies the middle band of the height), so the ribbon
+ * can never touch or clip against the banner's top/bottom borders.
  */
 @Composable
-private fun PhoneWave(
+private fun PhoneBottomEdge(
     height: Dp,
     background: Color,
     isPlaying: Boolean,
@@ -1106,7 +1105,7 @@ private fun PhoneWave(
     val motion by animateFloatAsState(
         targetValue = if (isPlaying) 1f else 0f,
         animationSpec = tween(durationMillis = 900),
-        label = "phone_aurora_motion"
+        label = "phone_edge_motion"
     )
 
     Canvas(
@@ -1116,123 +1115,89 @@ private fun PhoneWave(
     ) {
         val w = size.width
         val h = size.height
-        val phase = elapsed * 0.72f * motion
-        val travel = sin(phase) * h * 0.035f
-        val breathing = 0.5f + 0.5f * sin(phase * 0.72f)
+        val phase = elapsed * 0.7f * motion
+        val drift = sin(phase) * h * 0.015f
 
-        // Seamless dark fade: no opaque rectangle edge and no hard black strip.
+        // 1. Short soft blend, then a clean hard edge (no visible dark strip).
         drawRect(
             brush = Brush.verticalGradient(
                 0f to Color.Transparent,
-                0.16f to background.copy(alpha = 0.10f),
-                0.48f to background.copy(alpha = 0.68f),
-                0.78f to background.copy(alpha = 0.94f),
-                1f to background
+                0.28f to background.copy(alpha = 0.0f),
+                0.44f to background.copy(alpha = 0.55f),
+                0.55f to background
             )
         )
-
-        // Ambient violet light behind the ribbon.
         drawRect(
-            brush = Brush.radialGradient(
-                0f to BrandPurple.copy(alpha = 0.20f + 0.05f * breathing),
-                0.42f to BrandMagenta.copy(alpha = 0.075f),
-                1f to Color.Transparent,
-                center = Offset(w * 0.72f, h * 0.18f + travel),
-                radius = w * 0.78f
-            )
+            color = background,
+            topLeft = Offset(0f, h * 0.55f),
+            size = Size(w, h * 0.45f)
         )
 
-        fun ribbon(offsetY: Float, phaseShift: Float = 0f): Path {
-            val p = phase + phaseShift
-            val y0 = h * 0.34f + offsetY + sin(p) * h * 0.018f
-            val y1 = h * 0.30f + offsetY + sin(p + 1.0f) * h * 0.025f
-            val y2 = h * 0.16f + offsetY + sin(p + 2.0f) * h * 0.022f
-            val y3 = h * 0.13f + offsetY + sin(p + 2.8f) * h * 0.014f
-
-            return Path().apply {
-                moveTo(0f, y0)
-                cubicTo(
-                    w * 0.18f, y1 + travel,
-                    w * 0.31f, y1 + travel,
-                    w * 0.48f, h * 0.29f + offsetY + travel
-                )
-                cubicTo(
-                    w * 0.66f, h * 0.23f + offsetY - travel * 0.35f,
-                    w * 0.75f, y2,
-                    w * 0.88f, y3
-                )
-                cubicTo(
-                    w * 0.94f, y3 - h * 0.012f,
-                    w * 0.98f, y3 - h * 0.006f,
-                    w, y3
-                )
-            }
-        }
-
-        val main = ribbon(0f)
-        val lowerSilk = ribbon(h * 0.075f, -0.65f)
-        val upperSilk = ribbon(-h * 0.045f, 0.8f)
-
-        val violetBrush = Brush.horizontalGradient(
-            0f to Color(0xFF7130D9).copy(alpha = 0.12f),
-            0.18f to Color(0xFF9B4DFF).copy(alpha = 0.90f),
-            0.52f to Color(0xFFE0A0FF),
-            0.78f to Color(0xFFB45CFF),
-            1f to Color(0xFF7130D9).copy(alpha = 0.18f)
-        )
-        val highlightBrush = Brush.horizontalGradient(
+        // 2. Soft violet glow rim along the straight edge.
+        val rimY = h * 0.53f
+        val rimBrush = Brush.horizontalGradient(
             0f to Color.Transparent,
-            0.22f to Color(0xFFC68BFF).copy(alpha = 0.72f),
-            0.55f to Color(0xFFFFC8FF).copy(alpha = 0.96f),
-            0.82f to Color(0xFFB66AFF).copy(alpha = 0.76f),
+            0.25f to BrandPurple.copy(alpha = 0.85f),
+            0.62f to BrandMagenta.copy(alpha = 0.90f),
             1f to Color.Transparent
         )
-
-        // Wide, soft bloom layers create the premium neon haze without a bitmap blur.
-        drawPath(
-            path = main,
-            brush = violetBrush,
-            alpha = 0.10f + 0.035f * breathing,
-            style = Stroke(width = 28.dp.toPx(), cap = StrokeCap.Round)
+        drawLine(
+            brush = rimBrush,
+            start = Offset(0f, rimY),
+            end = Offset(w, rimY),
+            strokeWidth = 6.dp.toPx(),
+            cap = StrokeCap.Round,
+            alpha = 0.20f
         )
-        drawPath(
-            path = main,
-            brush = violetBrush,
-            alpha = 0.16f + 0.04f * breathing,
-            style = Stroke(width = 16.dp.toPx(), cap = StrokeCap.Round)
-        )
-        drawPath(
-            path = main,
-            brush = highlightBrush,
-            alpha = 0.22f + 0.05f * breathing,
-            style = Stroke(width = 8.dp.toPx(), cap = StrokeCap.Round)
+        drawLine(
+            brush = rimBrush,
+            start = Offset(0f, rimY),
+            end = Offset(w, rimY),
+            strokeWidth = 1.4.dp.toPx(),
+            cap = StrokeCap.Round
         )
 
-        // Fine layered strands give the ribbon its glassy, flowing depth.
+        // 3. One calm, full-width wave line, kept in the middle band of the canvas
+        //    (roughly 10%..42% of the height) so it can never hit the borders.
+        val cy = h * 0.26f
+        val ribbon = Path().apply {
+            moveTo(0f, cy + drift)
+            cubicTo(
+                w * 0.18f, cy - h * 0.10f + drift,
+                w * 0.34f, cy + h * 0.07f + drift,
+                w * 0.50f, cy - h * 0.03f + drift
+            )
+            cubicTo(
+                w * 0.66f, cy - h * 0.11f - drift,
+                w * 0.82f, cy + h * 0.05f - drift,
+                w, cy - h * 0.04f - drift
+            )
+        }
+        val waveBrush = Brush.horizontalGradient(
+            0f to Color(0xFF7130D9).copy(alpha = 0.15f),
+            0.20f to Color(0xFF9B4DFF).copy(alpha = 0.85f),
+            0.55f to Color(0xFFE0A0FF),
+            0.80f to Color(0xFFB45CFF).copy(alpha = 0.80f),
+            1f to Color(0xFF7130D9).copy(alpha = 0.15f)
+        )
+        // Gentle glow — small enough to stay inside the band.
         drawPath(
-            path = upperSilk,
-            brush = violetBrush,
-            alpha = 0.38f,
-            style = Stroke(width = 1.1.dp.toPx(), cap = StrokeCap.Round)
+            path = ribbon,
+            brush = waveBrush,
+            alpha = 0.18f,
+            style = Stroke(width = 10.dp.toPx(), cap = StrokeCap.Round)
         )
         drawPath(
-            path = lowerSilk,
-            brush = highlightBrush,
-            alpha = 0.30f,
-            style = Stroke(width = 1.25.dp.toPx(), cap = StrokeCap.Round)
+            path = ribbon,
+            brush = waveBrush,
+            alpha = 0.35f,
+            style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
         )
-
-        // Crisp luminous edge.
+        // Luminous core.
         drawPath(
-            path = main,
-            brush = highlightBrush,
-            alpha = 0.88f,
-            style = Stroke(width = 1.65.dp.toPx(), cap = StrokeCap.Round)
-        )
-        drawPath(
-            path = main,
-            color = Color.White.copy(alpha = 0.30f),
-            style = Stroke(width = 0.55.dp.toPx(), cap = StrokeCap.Round)
+            path = ribbon,
+            color = Color(0xFFFFC8FF).copy(alpha = 0.85f),
+            style = Stroke(width = 1.4.dp.toPx(), cap = StrokeCap.Round)
         )
     }
 }
