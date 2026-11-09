@@ -233,6 +233,7 @@ fun HeroBanner(
                     PhoneWave(
                         height = arcHeight,
                         background = screenBackground,
+                        isPlaying = isPlaying,
                         modifier = Modifier.align(Alignment.BottomCenter)
                     )
                 }
@@ -1074,8 +1075,40 @@ private fun FeatheredArtwork(url: String, modifier: Modifier = Modifier, wideVie
  * a bright swelling rim (soft glow built from stacked strokes) and two thinner ribbons beneath it.
  * The rim stays above the button row, like in the design mockup.
  */
+/**
+ * Phone-only aurora ribbon.
+ *
+ * The fade is painted as a continuous vertical blend into the app background (rather than
+ * filling below a hard-edged wave), preventing the visible dark strip at the banner boundary.
+ * The ribbon is built from layered cubic paths: a broad low-alpha bloom, two translucent
+ * silk strands, and a fine luminous core. Motion is deliberately restrained and only runs
+ * while the featured song is playing.
+ */
 @Composable
-private fun PhoneWave(height: Dp, background: Color, modifier: Modifier = Modifier) {
+private fun PhoneWave(
+    height: Dp,
+    background: Color,
+    isPlaying: Boolean,
+    modifier: Modifier = Modifier
+) {
+    var elapsed by remember { mutableFloatStateOf(0f) }
+
+    LaunchedEffect(isPlaying) {
+        if (isPlaying) {
+            while (true) {
+                withFrameMillis { frameTime ->
+                    elapsed = frameTime / 1000f
+                }
+            }
+        }
+    }
+
+    val motion by animateFloatAsState(
+        targetValue = if (isPlaying) 1f else 0f,
+        animationSpec = tween(durationMillis = 900),
+        label = "phone_aurora_motion"
+    )
+
     Canvas(
         modifier = modifier
             .fillMaxWidth()
@@ -1083,64 +1116,124 @@ private fun PhoneWave(height: Dp, background: Color, modifier: Modifier = Modifi
     ) {
         val w = size.width
         val h = size.height
+        val phase = elapsed * 0.72f * motion
+        val travel = sin(phase) * h * 0.035f
+        val breathing = 0.5f + 0.5f * sin(phase * 0.72f)
 
-        fun ribbon(dy: Float): Path = Path().apply {
-            moveTo(0f, h * 0.31f + dy)
-            cubicTo(w * 0.15f, h * 0.38f + dy, w * 0.32f, h * 0.40f + dy, w * 0.48f, h * 0.33f + dy)
-            cubicTo(w * 0.64f, h * 0.26f + dy, w * 0.74f, h * 0.06f + dy, w * 0.90f, h * 0.06f + dy)
-            cubicTo(w * 0.95f, h * 0.06f + dy, w * 0.98f, h * 0.07f + dy, w, h * 0.08f + dy)
-        }
-
-        // Light bloom above the swell
+        // Seamless dark fade: no opaque rectangle edge and no hard black strip.
         drawRect(
-            brush = Brush.radialGradient(
-                0f to BrandMagenta.copy(alpha = 0.30f),
-                0.6f to BrandPurple.copy(alpha = 0.10f),
-                1f to Color.Transparent,
-                center = Offset(w * 0.86f, h * 0.10f),
-                radius = w * 0.60f
-            )
-        )
-
-        // Violet haze under the rim, fading into the screen background
-        val filled = ribbon(0f).apply {
-            lineTo(w, h)
-            lineTo(0f, h)
-            close()
-        }
-        drawPath(
-            path = filled,
             brush = Brush.verticalGradient(
-                0f to BrandPurple.copy(alpha = 0.46f),
-                0.38f to Color(0xFF3A1673).copy(alpha = 0.60f),
+                0f to Color.Transparent,
+                0.16f to background.copy(alpha = 0.10f),
+                0.48f to background.copy(alpha = 0.68f),
                 0.78f to background.copy(alpha = 0.94f),
                 1f to background
             )
         )
 
-        val rimBrush = Brush.horizontalGradient(
-            0f to Color.Transparent,
-            0.07f to BrandPurple.copy(alpha = 0.85f),
-            0.50f to BrandMagenta,
-            0.86f to Color(0xFFE2B8FF),
-            1f to Color.Transparent
-        )
-        val pinkBrush = Brush.horizontalGradient(
-            0f to Color.Transparent,
-            0.10f to BrandMagenta.copy(alpha = 0.7f),
-            0.60f to BrandPink,
-            1f to Color.Transparent
+        // Ambient violet light behind the ribbon.
+        drawRect(
+            brush = Brush.radialGradient(
+                0f to BrandPurple.copy(alpha = 0.20f + 0.05f * breathing),
+                0.42f to BrandMagenta.copy(alpha = 0.075f),
+                1f to Color.Transparent,
+                center = Offset(w * 0.72f, h * 0.18f + travel),
+                radius = w * 0.78f
+            )
         )
 
-        // Soft glow = a few wide, faint strokes under the sharp core line
-        listOf(18.dp to 0.06f, 11.dp to 0.10f, 6.dp to 0.18f).forEach { (width, alpha) ->
-            drawPath(ribbon(0f), brush = rimBrush, alpha = alpha, style = Stroke(width = width.toPx(), cap = StrokeCap.Round))
+        fun ribbon(offsetY: Float, phaseShift: Float = 0f): Path {
+            val p = phase + phaseShift
+            val y0 = h * 0.34f + offsetY + sin(p) * h * 0.018f
+            val y1 = h * 0.30f + offsetY + sin(p + 1.0f) * h * 0.025f
+            val y2 = h * 0.16f + offsetY + sin(p + 2.0f) * h * 0.022f
+            val y3 = h * 0.13f + offsetY + sin(p + 2.8f) * h * 0.014f
+
+            return Path().apply {
+                moveTo(0f, y0)
+                cubicTo(
+                    w * 0.18f, y1 + travel,
+                    w * 0.31f, y1 + travel,
+                    w * 0.48f, h * 0.29f + offsetY + travel
+                )
+                cubicTo(
+                    w * 0.66f, h * 0.23f + offsetY - travel * 0.35f,
+                    w * 0.75f, y2,
+                    w * 0.88f, y3
+                )
+                cubicTo(
+                    w * 0.94f, y3 - h * 0.012f,
+                    w * 0.98f, y3 - h * 0.006f,
+                    w, y3
+                )
+            }
         }
-        drawPath(ribbon(0f), brush = rimBrush, style = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round))
 
-        // Secondary ribbons for depth
-        drawPath(ribbon(7.dp.toPx()), brush = pinkBrush, alpha = 0.55f, style = Stroke(width = 1.dp.toPx(), cap = StrokeCap.Round))
-        drawPath(ribbon(14.dp.toPx()), brush = rimBrush, alpha = 0.25f, style = Stroke(width = 0.8.dp.toPx(), cap = StrokeCap.Round))
+        val main = ribbon(0f)
+        val lowerSilk = ribbon(h * 0.075f, -0.65f)
+        val upperSilk = ribbon(-h * 0.045f, 0.8f)
+
+        val violetBrush = Brush.horizontalGradient(
+            0f to Color(0xFF7130D9).copy(alpha = 0.12f),
+            0.18f to Color(0xFF9B4DFF).copy(alpha = 0.90f),
+            0.52f to Color(0xFFE0A0FF),
+            0.78f to Color(0xFFB45CFF),
+            1f to Color(0xFF7130D9).copy(alpha = 0.18f)
+        )
+        val highlightBrush = Brush.horizontalGradient(
+            0f to Color.Transparent,
+            0.22f to Color(0xFFC68BFF).copy(alpha = 0.72f),
+            0.55f to Color(0xFFFFC8FF).copy(alpha = 0.96f),
+            0.82f to Color(0xFFB66AFF).copy(alpha = 0.76f),
+            1f to Color.Transparent
+        )
+
+        // Wide, soft bloom layers create the premium neon haze without a bitmap blur.
+        drawPath(
+            path = main,
+            brush = violetBrush,
+            alpha = 0.10f + 0.035f * breathing,
+            style = Stroke(width = 28.dp.toPx(), cap = StrokeCap.Round)
+        )
+        drawPath(
+            path = main,
+            brush = violetBrush,
+            alpha = 0.16f + 0.04f * breathing,
+            style = Stroke(width = 16.dp.toPx(), cap = StrokeCap.Round)
+        )
+        drawPath(
+            path = main,
+            brush = highlightBrush,
+            alpha = 0.22f + 0.05f * breathing,
+            style = Stroke(width = 8.dp.toPx(), cap = StrokeCap.Round)
+        )
+
+        // Fine layered strands give the ribbon its glassy, flowing depth.
+        drawPath(
+            path = upperSilk,
+            brush = violetBrush,
+            alpha = 0.38f,
+            style = Stroke(width = 1.1.dp.toPx(), cap = StrokeCap.Round)
+        )
+        drawPath(
+            path = lowerSilk,
+            brush = highlightBrush,
+            alpha = 0.30f,
+            style = Stroke(width = 1.25.dp.toPx(), cap = StrokeCap.Round)
+        )
+
+        // Crisp luminous edge.
+        drawPath(
+            path = main,
+            brush = highlightBrush,
+            alpha = 0.88f,
+            style = Stroke(width = 1.65.dp.toPx(), cap = StrokeCap.Round)
+        )
+        drawPath(
+            path = main,
+            color = Color.White.copy(alpha = 0.30f),
+            style = Stroke(width = 0.55.dp.toPx(), cap = StrokeCap.Round)
+        )
     }
 }
 
