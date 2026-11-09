@@ -142,7 +142,9 @@ fun HomeScreen(
                             HeroBanner(
                                 heroSong = uiState.heroSong,
                                 isPlaying = isHeroCurrent && playerState.isPlaying,
-                                onPlayPauseClick = { viewModel.toggleHeroPlayPause() }
+                                onPlayPauseClick = { viewModel.toggleHeroPlayPause() },
+                                onFavoriteClick = { song -> viewModel.toggleFavorite(song) },
+                                onAddToQueueClick = { song -> viewModel.addToQueue(song) }
                             )
                         }
 

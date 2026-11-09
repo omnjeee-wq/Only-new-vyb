@@ -1,23 +1,19 @@
 package com.example.ui.components
 
-import androidx.compose.material3.MaterialTheme
 import android.content.Context
 import android.content.Intent
-import android.graphics.drawable.BitmapDrawable
+import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import com.example.ui.theme.animation.pressScale
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -27,7 +23,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
@@ -35,240 +33,142 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.PlaylistAdd
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.Coil
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import coil.request.SuccessResult
 import com.example.R
 import com.example.domain.model.Song
+import com.example.ui.components.hero.CinematicBackdrop
+import com.example.ui.components.hero.parseArtists
+import com.example.ui.components.hero.splitTitle
 import com.example.ui.theme.OutfitFontFamily
-import com.example.ui.theme.PlayfairFontFamily
+import com.example.ui.theme.animation.pressScale
 import com.example.ui.theme.neonGlow
-import com.example.ui.theme.pulsingGlow
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlin.math.abs
+import kotlin.math.exp
+import kotlin.math.sin
 
 private val GreatVibesFontFamily = FontFamily(
-    Font(
-        resId = R.font.great_vibes,
-        weight = FontWeight.Normal
-    )
+    Font(resId = R.font.great_vibes, weight = FontWeight.Normal)
 )
 
-private val VibrantThemePalette = listOf(
-    Color(0xFFFF6436),
-    Color(0xFFFF2A85),
-    Color(0xFF00E5FF),
-    Color(0xFFA855F7),
-    Color(0xFFFFB800),
-    Color(0xFF10B981),
-    Color(0xFFFF3366)
-)
+private val BrandPurple = Color(0xFF8B3DFF)
+private val BrandMagenta = Color(0xFFC84BFF)
+private val BrandPink = Color(0xFFFF4FD8)
 
+/**
+ * Cinematic hero banner.
+ *
+ * Only the presentation lives here. Which song is featured is still decided by the ViewModel,
+ * and the artwork URL is the same 1:1 thumbnail as before.
+ *
+ * Layers (bottom -> top):
+ *  1. [CinematicBackdrop]  adaptive blurred background generated from the artwork
+ *  2. feathered sharp artwork (blends into the backdrop, no visible edges)
+ *  3. curved bottom edge that melts into the app background
+ *  4. foreground: top bar (unchanged), title, artists, actions, waveform, play orb
+ */
 @Composable
 fun HeroBanner(
     heroSong: Song?,
     isPlaying: Boolean,
     onPlayPauseClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onFavoriteClick: (Song) -> Unit = {},
+    onAddToQueueClick: (Song) -> Unit = {}
 ) {
     val context = LocalContext.current
+    val screenBackground = MaterialTheme.colorScheme.background
 
-    val artistName = heroSong?.artist?.ifBlank { "TOP ARTIST" } ?: "TOP ARTIST"
-    val artistImageUrl = heroSong?.artworkUrl
-
-    val fallbackTheme = remember(heroSong?.id) {
-        val hash = abs((heroSong?.id ?: "vybe").hashCode())
-        VibrantThemePalette[hash % VibrantThemePalette.size]
+    val artworkUrl = heroSong?.artworkUrl?.takeIf { it.isNotBlank() }
+    val titleParts = remember(heroSong?.title) { splitTitle(heroSong?.title.orEmpty()) }
+    val artistInfo = remember(heroSong?.artist) { parseArtists(heroSong?.artist.orEmpty(), limit = 3) }
+    val infoLine = remember(heroSong?.id, titleParts) {
+        val first = titleParts.sub
+            ?: heroSong?.album?.takeIf { it.isNotBlank() && !it.equals(titleParts.main, ignoreCase = true) }
+        listOfNotNull(first, heroSong?.year?.takeIf { it.isNotBlank() }).joinToString("  •  ")
     }
 
-    var targetThemeColor by remember(heroSong?.id) {
-        mutableStateOf(fallbackTheme)
-    }
-
-    // Theme is extracted from the artist photo, not just a static placeholder.
-    LaunchedEffect(artistImageUrl) {
-        if (!artistImageUrl.isNullOrBlank()) {
-            targetThemeColor = extractVibrantColorFromArtwork(
-                context = context,
-                imageUrl = artistImageUrl,
-                fallback = fallbackTheme
-            )
-        } else {
-            targetThemeColor = fallbackTheme
-        }
-    }
-
-    val themeColor by animateColorAsState(
-        targetValue = targetThemeColor,
-        animationSpec = tween(650),
-        label = "hero_artist_theme"
-    )
-
-    // Continuous smooth vinyl rotation.
-    val rotationTransition = rememberInfiniteTransition(label = "vinyl_rotation")
-    val vinylRotation by rotationTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = 9000,
-                easing = androidx.compose.animation.core.LinearEasing
-            ),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "vinyl_rotation_angle"
-    )
+    // Local optimistic heart state (the repository call itself is unchanged).
+    var liked by remember(heroSong?.id) { mutableStateOf(heroSong?.isLiked == true) }
 
     BoxWithConstraints(
         modifier = modifier
             .fillMaxWidth()
             .testTag("hero_banner")
     ) {
-        val availableWidth = maxWidth
+        val w = maxWidth
+        val sideBySide = w >= 520.dp
+        val isCompactNarrow = w < 360.dp
+        val isCompact = w < 430.dp
 
-        // Adaptive breakpoint determinations
-        val isCompactNarrow = availableWidth < 360.dp
-        val isCompact = availableWidth < 430.dp
-        val isMedium = availableWidth < 600.dp
-        val isExpanded = availableWidth < 840.dp
-
-        // 1. Adaptive Banner Height:
-        // Scales proportionally to available width so compact screens are not overwhelmed
-        // and tablets have generous cinematic visual impact.
-        val bannerHeight = when {
-            isCompactNarrow -> 310.dp
-            isCompact -> 345.dp
-            isMedium -> 365.dp
-            isExpanded -> 385.dp
-            else -> 415.dp
+        val bannerHeight = if (sideBySide) {
+            (w * 0.72f).coerceIn(430.dp, 520.dp)
+        } else {
+            (w * 1.30f).coerceIn(470.dp, 560.dp)
         }
-
-        // 2. Adaptive Spacing & Insets
-        val horizontalPadding = when {
+        val hPad = when {
             isCompactNarrow -> 14.dp
             isCompact -> 18.dp
-            isMedium -> 22.dp
-            isExpanded -> 28.dp
-            else -> 36.dp
+            sideBySide -> 32.dp
+            else -> 22.dp
         }
-
-        val verticalPadding = when {
-            isCompactNarrow -> 6.dp
-            isCompact -> 8.dp
-            else -> 10.dp
-        }
-
-        // 3. Proportional Vinyl Sizing:
-        // Adapts dynamically so it never collides with or covers left-side text.
-        val discSize = when {
-            isCompactNarrow -> (availableWidth * 0.44f).coerceIn(135.dp, 155.dp)
-            isCompact -> (availableWidth * 0.46f).coerceIn(170.dp, 195.dp)
-            isMedium -> (availableWidth * 0.42f).coerceIn(200.dp, 235.dp)
-            isExpanded -> (availableWidth * 0.36f).coerceIn(240.dp, 280.dp)
-            else -> (availableWidth * 0.30f).coerceIn(280.dp, 330.dp)
-        }
-
-        val vinylEndPadding = when {
-            isCompactNarrow -> 8.dp
-            isCompact -> 12.dp
-            isMedium -> 16.dp
-            isExpanded -> 24.dp
-            else -> 36.dp
-        }
-
-        // 4. Safe Maximum Text Width:
-        // Evaluates remaining space on the left to guarantee zero overlap with the vinyl disc.
-        val safeGap = if (isCompactNarrow) 8.dp else 16.dp
-        val maxTextWidth = (availableWidth - vinylEndPadding - discSize - horizontalPadding - safeGap)
-            .coerceIn(130.dp, 580.dp)
-
-        // 5. Adaptive Typography Sizing
-        val scriptFontSize = when {
-            isCompactNarrow -> 28.sp
-            isCompact -> 36.sp
-            isMedium -> 40.sp
-            isExpanded -> 46.sp
-            else -> 52.sp
-        }
-
-        val titleFontSize = when {
-            isCompactNarrow -> 22.sp
-            isCompact -> 28.sp
-            isMedium -> 34.sp
-            isExpanded -> 40.sp
-            else -> 46.sp
-        }
-
-        val titleLineHeight = when {
-            isCompactNarrow -> 26.sp
-            isCompact -> 33.sp
-            isMedium -> 39.sp
-            isExpanded -> 46.sp
-            else -> 52.sp
-        }
-
-        val artistFontSize = when {
-            isCompactNarrow -> 12.sp
-            isCompact -> 13.sp
-            isMedium -> 14.sp
-            else -> 15.sp
-        }
-
-        // 6. Adaptive Play Button Sizing
-        val playButtonHorizontalPadding = if (isCompactNarrow) 16.dp else if (isCompact) 20.dp else 24.dp
-        val playButtonVerticalPadding = if (isCompactNarrow) 8.dp else 10.dp
-        val playButtonIconSize = if (isCompactNarrow) 16.dp else 18.dp
-        val playButtonFontSize = if (isCompactNarrow) 12.sp else 13.sp
-
-        // 7. Adaptive Top Bar Sizing
-        val vybeTitleFontSize = if (isCompactNarrow) 22.sp else if (isCompact) 25.sp else 28.sp
-        val shareButtonSize = if (isCompactNarrow) 34.dp else 38.dp
-        val shareIconSize = if (isCompactNarrow) 16.dp else 19.dp
-
-        // 8. Vinyl Internal Components Proportional Dimensions
-        val outerVinylSize = discSize * 0.93f
-        val discGlowSize = discSize * 0.97f
-        val discGlowRadius = (discSize * 0.18f).coerceIn(22.dp, 54.dp)
-        val artistCenterSize = (discSize * 0.41f).coerceIn(56.dp, 135.dp)
-        val centerHoleSize = (discSize * 0.045f).coerceIn(6.dp, 14.dp)
-        val centerGlowRadius = (discSize * 0.07f).coerceIn(8.dp, 20.dp)
-
-        // 9. Adaptive Bottom Separator Height
+        val arcHeight = if (sideBySide) 52.dp else 44.dp
+        val orbSize = if (isCompactNarrow) 48.dp else 56.dp
+        val textMaxWidth = if (sideBySide) w * 0.56f else w - hPad * 2
         val separatorHeight = if (isCompactNarrow) 24.dp else if (isCompact) 32.dp else 44.dp
 
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -278,414 +178,131 @@ fun HeroBanner(
                     .height(bannerHeight)
                     .clipToBounds()
             ) {
-
-                // --------------------------------------------------------
-                // 1. SONG THUMBNAIL = FULL BLEED BLURRED BACKGROUND
-                // --------------------------------------------------------
-                if (heroSong != null && heroSong.artworkUrl.isNotBlank()) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(context)
-                            .data(heroSong.artworkUrl)
-                            .crossfade(true)
-                            .size(768, 768)
-                            .build(),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        alignment = Alignment.Center,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .scale(1.18f)
-                            .blur(28.dp)
-                    )
-
-                    // Dark cinematic overlay
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.30f))
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.radialGradient(
-                                    colors = listOf(
-                                        Color(0xFF26182B),
-                                        MaterialTheme.colorScheme.background
-                                    ),
-                                    radius = 700f
-                                )
-                            )
-                    )
-                }
-
-                // Artist-color ambient wash
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.radialGradient(
-                                colors = listOf(
-                                    themeColor.copy(alpha = 0.26f),
-                                    Color.Transparent
-                                ),
-                                radius = (availableWidth.value * 1.5f).coerceAtLeast(600f)
-                            )
-                        )
+                // 1. Adaptive cinematic background (artwork -> blur -> palette -> glow -> overlays)
+                CinematicBackdrop(
+                    artworkUrl = artworkUrl,
+                    seed = heroSong?.id,
+                    baseColor = screenBackground,
+                    modifier = Modifier.matchParentSize()
                 )
 
-                // Left readability gradient with dynamic stop aligned to text width
-                val gradientStop1 = ((maxTextWidth / availableWidth) * 0.80f).coerceIn(0.35f, 0.55f)
-                val gradientStop2 = ((maxTextWidth / availableWidth) * 1.18f).coerceIn(0.58f, 0.85f)
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.horizontalGradient(
-                                0f to Color(0xD9000000),
-                                gradientStop1 to Color(0x88000000),
-                                gradientStop2 to Color.Transparent,
-                                1f to Color.Transparent
-                            )
-                        )
-                )
-
-                // Theme-aware fade: blend into the screen background.
-                val screenBackground = MaterialTheme.colorScheme.background
-                val bottomFadeHeight = (bannerHeight * 0.28f).coerceIn(80.dp, 120.dp)
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(bottomFadeHeight)
-                        .align(Alignment.BottomCenter)
-                        .background(
-                            Brush.verticalGradient(
-                                0f to Color.Transparent,
-                                0.38f to screenBackground.copy(alpha = 0.30f),
-                                0.72f to screenBackground.copy(alpha = 0.82f),
-                                1f to screenBackground
-                            )
-                        )
-                )
-
-                // --------------------------------------------------------
-                // 2. PROPORTIONALLY SCALED ROTATING VINYL + ARTIST PHOTO
-                // --------------------------------------------------------
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .padding(end = vinylEndPadding)
-                        .size(discSize)
-                        .graphicsLayer {
-                            rotationZ = vinylRotation
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-
-                    // Big soft glow behind the disc
-                    Box(
-                        modifier = Modifier
-                            .size(discGlowSize)
-                            .neonGlow(
-                                color = themeColor,
-                                radius = discGlowRadius,
-                                alpha = 0.75f
-                            )
-                            .background(
-                                Brush.radialGradient(
-                                    colors = listOf(
-                                        themeColor.copy(alpha = 0.34f),
-                                        Color.Transparent
-                                    )
-                                ),
-                                CircleShape
-                            )
-                    )
-
-                    // Outer vinyl body
-                    Box(
-                        modifier = Modifier
-                            .size(outerVinylSize)
-                            .clip(CircleShape)
-                            .background(
-                                Brush.radialGradient(
-                                    colors = listOf(
-                                        Color(0xFF343434),
-                                        Color(0xFF101010),
-                                        Color.Black,
-                                        Color(0xFF181818)
-                                    )
-                                )
-                            )
-                            .border(
-                                1.5.dp,
-                                themeColor.copy(alpha = 0.65f),
-                                CircleShape
-                            )
-                    ) {
-                        // Proportional Vinyl Grooves
-                        for (i in 0..7) {
-                            val grooveSize = outerVinylSize * (0.86f - i * 0.072f)
-                            if (grooveSize > artistCenterSize + 6.dp) {
-                                Box(
+                // 2. Sharp artwork, feathered into the backdrop
+                if (artworkUrl != null) {
+                    Crossfade(
+                        targetState = artworkUrl,
+                        animationSpec = tween(500),
+                        label = "hero_artwork_crossfade",
+                        modifier = Modifier.matchParentSize()
+                    ) { url ->
+                        Box(Modifier.fillMaxSize()) {
+                            if (sideBySide) {
+                                val side = bannerHeight * 1.12f
+                                FeatheredArtwork(
+                                    url = url,
                                     modifier = Modifier
-                                        .align(Alignment.Center)
-                                        .size(grooveSize)
-                                        .border(
-                                            1.dp,
-                                            Color.White.copy(alpha = 0.10f),
-                                            CircleShape
-                                        )
+                                        .align(Alignment.TopEnd)
+                                        .size(side)
+                                        .offset(x = side * 0.10f, y = -(side * 0.05f))
+                                )
+                            } else {
+                                val side = w * 1.15f
+                                FeatheredArtwork(
+                                    url = url,
+                                    modifier = Modifier
+                                        .align(Alignment.TopCenter)
+                                        .requiredSize(side)
+                                        .offset(y = -(side * 0.04f))
                                 )
                             }
                         }
-
-                        // Artist image in the center
-                        if (!artistImageUrl.isNullOrBlank()) {
-                            AsyncImage(
-                                model = ImageRequest.Builder(context)
-                                    .data(artistImageUrl)
-                                    .crossfade(true)
-                                    .size(240, 240)
-                                    .build(),
-                                contentDescription = artistName,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .align(Alignment.Center)
-                                    .size(artistCenterSize)
-                                    .clip(CircleShape)
-                                    .border(
-                                        2.dp,
-                                        themeColor.copy(alpha = 0.95f),
-                                        CircleShape
-                                    )
-                                    .neonGlow(
-                                        color = themeColor,
-                                        radius = centerGlowRadius,
-                                        alpha = 0.75f
-                                    )
-                            )
-                        } else {
-                            Box(
-                                modifier = Modifier
-                                    .align(Alignment.Center)
-                                    .size(artistCenterSize)
-                                    .clip(CircleShape)
-                                    .background(themeColor.copy(alpha = 0.25f))
-                            )
-                        }
-
-                        // Center spindle hole
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .size(centerHoleSize)
-                                .clip(CircleShape)
-                                .background(Color.Black.copy(alpha = 0.65f))
-                                .border(
-                                    1.dp,
-                                    Color.White.copy(alpha = 0.25f),
-                                    CircleShape
-                                )
-                        )
                     }
                 }
 
-                // --------------------------------------------------------
-                // 3. FOREGROUND CONTENT (TOP BAR, TITLES & CONTROLS)
-                // --------------------------------------------------------
+                // 3. Curved bottom edge in the app background colour (with a soft violet rim)
+                BottomArc(
+                    height = arcHeight,
+                    background = screenBackground,
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                )
+
+                // 4. Foreground
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .statusBarsPadding()
                         .padding(
-                            start = horizontalPadding,
-                            end = horizontalPadding,
-                            top = verticalPadding,
-                            bottom = verticalPadding + 4.dp
+                            start = hPad,
+                            end = hPad,
+                            top = if (isCompact) 8.dp else 10.dp,
+                            bottom = arcHeight * 0.8f
                         ),
-                    verticalArrangement = Arrangement.SpaceBetween,
-                    horizontalAlignment = Alignment.Start
+                    verticalArrangement = Arrangement.SpaceBetween
                 ) {
+                    HeroTopBar(
+                        context = context,
+                        isCompactNarrow = isCompactNarrow,
+                        isCompact = isCompact
+                    )
 
-                    // Top Bar (Branding + Share Action)
-                    Row(
+                    BoxWithConstraints(
                         modifier = Modifier
+                            .weight(1f)
                             .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(if (isCompactNarrow) 8.dp else 10.dp)
-                        ) {
-                            // Use the app's actual VYBE logo asset, without an extra badge behind it.
-                            Image(
-                                painter = painterResource(id = R.drawable.vybe_logo),
-                                contentDescription = "VYBE logo",
-                                contentScale = ContentScale.Fit,
-                                modifier = Modifier.size(
-                                    if (isCompactNarrow) 44.dp
-                                    else if (isCompact) 50.dp
-                                    else 56.dp
-                                )
-                            )
+                        val titleBudget = (maxHeight - 224.dp).coerceAtLeast(64.dp)
+                        val waveWidth = if (sideBySide) textMaxWidth else w - hPad * 2 - orbSize - 12.dp
 
-                            Text(
-                                text = "VYBE",
-                                color = Color.White,
-                                fontSize = vybeTitleFontSize,
-                                fontWeight = FontWeight.Black,
-                                fontFamily = FontFamily.SansSerif,
-                                letterSpacing = (-0.6).sp
-                            )
-                        }
-
-                        IconButton(
-                            onClick = { shareVybeApp(context) },
+                        HeroInfoColumn(
                             modifier = Modifier
-                                .size(shareButtonSize)
-                                .clip(CircleShape)
-                                .background(Color.White.copy(alpha = 0.16f))
-                                .border(
-                                    1.dp,
-                                    Color.White.copy(alpha = 0.22f),
-                                    CircleShape
-                                )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Share,
-                                contentDescription = "Share VYBE",
-                                tint = Color.White,
-                                modifier = Modifier.size(shareIconSize)
-                            )
-                        }
-                    }
-
-                    // Just Vibe + Song Title + Artist Metadata
-                    Column(
-                        modifier = Modifier
-                            .widthIn(max = maxTextWidth)
-                            .padding(bottom = 4.dp)
-                    ) {
-                        Text(
-                            text = "Just Vibe",
-                            color = themeColor,
-                            fontSize = scriptFontSize,
-                            fontFamily = GreatVibesFontFamily,
-                            fontWeight = FontWeight.Normal,
-                            style = TextStyle(
-                                shadow = Shadow(
-                                    color = themeColor.copy(alpha = 0.90f),
-                                    blurRadius = 28f
-                                )
-                            )
+                                .align(Alignment.BottomStart)
+                                .widthIn(max = textMaxWidth),
+                            mainTitle = titleParts.main.ifBlank { "Discover your vibe" },
+                            infoLine = infoLine,
+                            artists = artistInfo.first,
+                            extraArtists = artistInfo.second,
+                            isPlaying = isPlaying,
+                            liked = liked,
+                            titleMaxSize = when {
+                                isCompactNarrow -> 40.sp
+                                isCompact -> 48.sp
+                                sideBySide && w >= 700.dp -> 64.sp
+                                sideBySide -> 54.sp
+                                else -> 52.sp
+                            },
+                            titleMinSize = 26.sp,
+                            titleMaxHeight = titleBudget,
+                            waveWidth = waveWidth,
+                            compactNarrow = isCompactNarrow,
+                            onPlayPause = onPlayPauseClick,
+                            onLike = {
+                                heroSong?.let {
+                                    liked = !liked
+                                    onFavoriteClick(it)
+                                }
+                            },
+                            onQueue = {
+                                heroSong?.let {
+                                    onAddToQueueClick(it)
+                                    Toast.makeText(context, "Added to queue", Toast.LENGTH_SHORT).show()
+                                }
+                            },
+                            onShare = { heroSong?.let { shareSong(context, it, artistInfo.first) } }
                         )
-
-                        Spacer(modifier = Modifier.height(2.dp))
-
-                        Text(
-                            text = heroSong?.title?.ifBlank { "Ghera Hua" } ?: "Ghera Hua",
-                            color = Color.White,
-                            fontSize = titleFontSize,
-                            lineHeight = titleLineHeight,
-                            fontFamily = PlayfairFontFamily,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            style = TextStyle(
-                                shadow = Shadow(
-                                    color = themeColor.copy(alpha = 0.50f),
-                                    blurRadius = 18f
-                                )
-                            )
-                        )
-
-                        if (!isCompactNarrow && artistName.isNotBlank() && artistName != "TOP ARTIST") {
-                            Spacer(modifier = Modifier.height(3.dp))
-                            Text(
-                                text = artistName,
-                                color = Color.White.copy(alpha = 0.75f),
-                                fontSize = artistFontSize,
-                                fontFamily = OutfitFontFamily,
-                                fontWeight = FontWeight.Medium,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-
-                    // Play / Pause Button with Touch Accessibility Target
-                    Box(
-                        modifier = Modifier
-                            .pulsingGlow(
-                                color = themeColor,
-                                minRadius = 8.dp,
-                                maxRadius = 20.dp,
-                                cornerRadius = 24.dp
-                            )
-                            .clip(RoundedCornerShape(24.dp))
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(
-                                        themeColor.copy(alpha = 0.92f),
-                                        themeColor.copy(alpha = 0.58f)
-                                    )
-                                )
-                            )
-                            .border(
-                                1.dp,
-                                Color.White.copy(alpha = 0.38f),
-                                RoundedCornerShape(24.dp)
-                            )
-                            .pressScale(pressedScale = 0.92f) { onPlayPauseClick() }
-                            .padding(
-                                horizontal = playButtonHorizontalPadding,
-                                vertical = playButtonVerticalPadding
-                            )
-                            .testTag("hero_play_button"),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            AnimatedContent(
-                                targetState = isPlaying,
-                                transitionSpec = {
-                                    fadeIn(tween(150)) togetherWith
-                                        androidx.compose.animation.fadeOut(tween(150))
-                                },
-                                label = "hero_play_icon"
-                            ) { playing ->
-                                Icon(
-                                    imageVector = if (playing) {
-                                        Icons.Default.Pause
-                                    } else {
-                                        Icons.Default.PlayArrow
-                                    },
-                                    contentDescription = if (playing) "Pause" else "Play",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(playButtonIconSize)
-                                )
-                            }
-
-                            Text(
-                                text = if (isPlaying) "PAUSE" else "PLAY",
-                                color = Color.White,
-                                fontSize = playButtonFontSize,
-                                fontFamily = OutfitFontFamily,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.2.sp
-                            )
-                        }
                     }
                 }
+
+                // Round play / pause orb (bottom end)
+                PlayOrb(
+                    isPlaying = isPlaying,
+                    size = orbSize,
+                    onClick = onPlayPauseClick,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(end = hPad, bottom = arcHeight * 0.8f - (orbSize - 34.dp) / 2)
+                )
             }
 
-            // Seamless spacer matching the current app theme, never hardcoded black.
+            // Spacer matching the current app theme (unchanged spacing below the banner).
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -696,64 +313,566 @@ fun HeroBanner(
     }
 }
 
-/**
- * Extracts a vibrant colour from the artist image.
- */
-private suspend fun extractVibrantColorFromArtwork(
+// -------------------------------------------------------------------------------------------------
+// Top bar: VYBE logo + VYBE text + share button. Kept exactly as the previous design.
+// -------------------------------------------------------------------------------------------------
+@Composable
+private fun HeroTopBar(
     context: Context,
-    imageUrl: String,
-    fallback: Color
-): Color = withContext(Dispatchers.IO) {
-    try {
-        val loader = Coil.imageLoader(context)
+    isCompactNarrow: Boolean,
+    isCompact: Boolean
+) {
+    val vybeTitleFontSize = if (isCompactNarrow) 22.sp else if (isCompact) 25.sp else 28.sp
+    val shareButtonSize = if (isCompactNarrow) 34.dp else 38.dp
+    val shareIconSize = if (isCompactNarrow) 16.dp else 19.dp
 
-        val request = ImageRequest.Builder(context)
-            .data(imageUrl)
-            .allowHardware(false)
-            .size(64, 64)
-            .build()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(if (isCompactNarrow) 8.dp else 10.dp)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.vybe_logo),
+                contentDescription = "VYBE logo",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.size(
+                    if (isCompactNarrow) 44.dp
+                    else if (isCompact) 50.dp
+                    else 56.dp
+                )
+            )
 
-        val result = (loader.execute(request) as? SuccessResult)?.drawable
-        val bitmap = (result as? BitmapDrawable)?.bitmap
-            ?: return@withContext fallback
+            Text(
+                text = "VYBE",
+                color = Color.White,
+                fontSize = vybeTitleFontSize,
+                fontWeight = FontWeight.Black,
+                fontFamily = FontFamily.SansSerif,
+                letterSpacing = (-0.6).sp
+            )
+        }
 
-        var bestColor = fallback
-        var highestScore = -1f
+        IconButton(
+            onClick = { shareVybeApp(context) },
+            modifier = Modifier
+                .size(shareButtonSize)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.16f))
+                .border(
+                    1.dp,
+                    Color.White.copy(alpha = 0.22f),
+                    CircleShape
+                )
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Share,
+                contentDescription = "Share VYBE",
+                tint = Color.White,
+                modifier = Modifier.size(shareIconSize)
+            )
+        }
+    }
+}
 
-        val width = bitmap.width
-        val height = bitmap.height
-        val step = maxOf(1, width / 12)
+// -------------------------------------------------------------------------------------------------
+// Title / artists / actions / waveform
+// -------------------------------------------------------------------------------------------------
+@Composable
+private fun HeroInfoColumn(
+    modifier: Modifier,
+    mainTitle: String,
+    infoLine: String,
+    artists: List<String>,
+    extraArtists: Int,
+    isPlaying: Boolean,
+    liked: Boolean,
+    titleMaxSize: TextUnit,
+    titleMinSize: TextUnit,
+    titleMaxHeight: Dp,
+    waveWidth: Dp,
+    compactNarrow: Boolean,
+    onPlayPause: () -> Unit,
+    onLike: () -> Unit,
+    onQueue: () -> Unit,
+    onShare: () -> Unit
+) {
+    val iconButtonSize = if (compactNarrow) 38.dp else 44.dp
 
-        for (x in 0 until width step step) {
-            for (y in 0 until height step step) {
-                val pixel = bitmap.getPixel(x, y)
+    Column(modifier = modifier, horizontalAlignment = Alignment.Start) {
+        // Badge
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(50))
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(BrandPurple.copy(alpha = 0.60f), BrandMagenta.copy(alpha = 0.34f))
+                    )
+                )
+                .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(50))
+                .padding(horizontal = 12.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.AutoAwesome,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(14.dp)
+            )
+            Text(
+                text = "Just Vibe",
+                color = Color.White,
+                fontSize = 12.sp,
+                fontFamily = OutfitFontFamily,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
 
-                val r = android.graphics.Color.red(pixel) / 255f
-                val g = android.graphics.Color.green(pixel) / 255f
-                val b = android.graphics.Color.blue(pixel) / 255f
+        Spacer(Modifier.height(8.dp))
 
-                val max = maxOf(r, g, b)
-                val min = minOf(r, g, b)
-                val delta = max - min
+        // Title: script font, auto-shrinks (max 2 lines) so long names never overflow.
+        FitScriptTitle(
+            text = mainTitle,
+            maxFontSize = titleMaxSize,
+            minFontSize = titleMinSize,
+            maxHeight = titleMaxHeight
+        )
 
-                val saturation = if (max == 0f) 0f else delta / max
-                val value = max
+        TitleUnderline()
 
-                if (value in 0.35f..0.98f && saturation > 0.35f) {
-                    val score = saturation * 2.0f + value
+        Spacer(Modifier.height(8.dp))
 
-                    if (score > highestScore) {
-                        highestScore = score
-                        bestColor = Color(r, g, b)
+        // Artists: max 3, wraps to 2 lines max, never overlaps anything.
+        if (artists.isNotEmpty()) {
+            val annotated = buildAnnotatedString {
+                artists.forEachIndexed { index, name ->
+                    if (index > 0) {
+                        withStyle(SpanStyle(color = BrandMagenta)) { append("  •  ") }
                     }
+                    append(name.uppercase())
                 }
+                if (extraArtists > 0) {
+                    withStyle(SpanStyle(color = BrandMagenta)) { append("  +$extraArtists") }
+                }
+            }
+            Text(
+                text = annotated,
+                color = Color.White.copy(alpha = 0.94f),
+                fontSize = if (compactNarrow) 11.sp else 12.5.sp,
+                fontFamily = OutfitFontFamily,
+                fontWeight = FontWeight.Medium,
+                letterSpacing = 1.3.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        if (infoLine.isNotBlank()) {
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = infoLine,
+                color = Color.White.copy(alpha = 0.62f),
+                fontSize = if (compactNarrow) 12.sp else 13.sp,
+                fontFamily = OutfitFontFamily,
+                fontWeight = FontWeight.Normal,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        Spacer(Modifier.height(14.dp))
+
+        // Actions
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(if (compactNarrow) 8.dp else 10.dp)
+        ) {
+            PlayNowButton(isPlaying = isPlaying, compactNarrow = compactNarrow, onClick = onPlayPause)
+
+            RoundActionButton(
+                size = iconButtonSize,
+                onClick = onLike,
+                contentDescription = if (liked) "Remove from favourites" else "Add to favourites"
+            ) {
+                Icon(
+                    imageVector = if (liked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                    contentDescription = null,
+                    tint = if (liked) BrandPink else Color.White,
+                    modifier = Modifier.size(21.dp)
+                )
+            }
+            RoundActionButton(
+                size = iconButtonSize,
+                onClick = onQueue,
+                contentDescription = "Add to queue"
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.PlaylistAdd,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            RoundActionButton(
+                size = iconButtonSize,
+                onClick = onShare,
+                contentDescription = "Share song"
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Share,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
 
-        bestColor
-    } catch (_: Exception) {
-        fallback
+        Spacer(Modifier.height(12.dp))
+
+        HeroWaveform(
+            isPlaying = isPlaying,
+            modifier = Modifier
+                .width(waveWidth)
+                .height(34.dp)
+        )
     }
+}
+
+/**
+ * Script title that shrinks until it fits in [maxHeight] with at most two lines,
+ * then falls back to an ellipsis at [minFontSize].
+ */
+@Composable
+private fun FitScriptTitle(
+    text: String,
+    maxFontSize: TextUnit,
+    minFontSize: TextUnit,
+    maxHeight: Dp
+) {
+    val measurer: TextMeasurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val baseStyle = remember {
+        TextStyle(
+            fontFamily = GreatVibesFontFamily,
+            fontWeight = FontWeight.Normal,
+            color = Color.White,
+            shadow = Shadow(
+                color = Color(0x99000000),
+                offset = Offset(0f, 4f),
+                blurRadius = 14f
+            )
+        )
+    }
+
+    BoxWithConstraints {
+        val widthPx = constraints.maxWidth
+        val heightPx = with(density) { maxHeight.roundToPx() }
+
+        val fontSize = remember(text, widthPx, heightPx, maxFontSize, minFontSize) {
+            var size = maxFontSize.value
+            var result = minFontSize.value
+            while (size >= minFontSize.value) {
+                val layout = measurer.measure(
+                    text = text,
+                    style = baseStyle.copy(fontSize = size.sp),
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 2,
+                    constraints = Constraints(maxWidth = widthPx)
+                )
+                if (!layout.hasVisualOverflow && layout.size.height <= heightPx) {
+                    result = size
+                    break
+                }
+                size -= 2f
+            }
+            result.sp
+        }
+
+        Text(
+            text = text,
+            style = baseStyle,
+            fontSize = fontSize,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+private fun TitleUnderline() {
+    Canvas(
+        modifier = Modifier
+            .padding(start = 28.dp, top = 2.dp)
+            .width(130.dp)
+            .height(8.dp)
+    ) {
+        val path = Path().apply {
+            moveTo(0f, size.height * 0.85f)
+            quadraticBezierTo(size.width * 0.5f, size.height * 0.05f, size.width, size.height * 0.45f)
+        }
+        drawPath(
+            path = path,
+            brush = Brush.horizontalGradient(
+                listOf(BrandPurple, BrandMagenta, BrandMagenta.copy(alpha = 0f))
+            ),
+            style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
+        )
+    }
+}
+
+@Composable
+private fun PlayNowButton(isPlaying: Boolean, compactNarrow: Boolean, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(50)
+    Box(
+        modifier = Modifier
+            .neonGlow(color = BrandPurple, radius = 14.dp, alpha = 0.55f, cornerRadius = 50.dp)
+            .clip(shape)
+            .background(Brush.horizontalGradient(listOf(BrandPurple, BrandMagenta)))
+            .border(1.dp, Color.White.copy(alpha = 0.30f), shape)
+            .pressScale(pressedScale = 0.94f) { onClick() }
+            .padding(
+                horizontal = if (compactNarrow) 16.dp else 22.dp,
+                vertical = if (compactNarrow) 10.dp else 12.dp
+            )
+            .testTag("hero_play_button"),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            AnimatedContent(
+                targetState = isPlaying,
+                transitionSpec = { fadeIn(tween(150)) togetherWith fadeOut(tween(150)) },
+                label = "hero_play_icon"
+            ) { playing ->
+                Icon(
+                    imageVector = if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                    contentDescription = if (playing) "Pause" else "Play",
+                    tint = Color.White,
+                    modifier = Modifier.size(if (compactNarrow) 18.dp else 22.dp)
+                )
+            }
+            Text(
+                text = if (isPlaying) "Pause" else "Play Now",
+                color = Color.White,
+                fontSize = if (compactNarrow) 13.sp else 15.sp,
+                fontFamily = OutfitFontFamily,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1
+            )
+        }
+    }
+}
+
+@Composable
+private fun RoundActionButton(
+    size: Dp,
+    onClick: () -> Unit,
+    contentDescription: String,
+    content: @Composable () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(Color.Black.copy(alpha = 0.28f))
+            .border(1.dp, Color.White.copy(alpha = 0.28f), CircleShape)
+            .pressScale(pressedScale = 0.90f) { onClick() }
+            .testTag(contentDescription),
+        contentAlignment = Alignment.Center
+    ) {
+        content()
+    }
+}
+
+@Composable
+private fun PlayOrb(
+    isPlaying: Boolean,
+    size: Dp,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .size(size)
+            .neonGlow(color = BrandMagenta, radius = 18.dp, alpha = 0.50f, cornerRadius = size / 2)
+            .clip(CircleShape)
+            .background(
+                Brush.radialGradient(
+                    listOf(Color(0xFF2A1450).copy(alpha = 0.92f), Color(0xFF120A26).copy(alpha = 0.92f))
+                )
+            )
+            .border(
+                2.dp,
+                Brush.linearGradient(listOf(BrandPurple, BrandPink)),
+                CircleShape
+            )
+            .pressScale(pressedScale = 0.92f) { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        AnimatedContent(
+            targetState = isPlaying,
+            transitionSpec = { fadeIn(tween(150)) togetherWith fadeOut(tween(150)) },
+            label = "hero_orb_icon"
+        ) { playing ->
+            Icon(
+                imageVector = if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                contentDescription = if (playing) "Pause" else "Play",
+                tint = Color.White,
+                modifier = Modifier.size(size * 0.50f)
+            )
+        }
+    }
+}
+
+/**
+ * Decorative waveform. Bars move only while music is playing (frame loop is cancelled when paused),
+ * and all per-frame work happens in the draw phase, so it never causes recomposition.
+ */
+@Composable
+private fun HeroWaveform(isPlaying: Boolean, modifier: Modifier = Modifier) {
+    var time by remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(isPlaying) {
+        if (isPlaying) {
+            while (true) {
+                withFrameMillis { time = it / 1000f }
+            }
+        }
+    }
+    val amplitude by animateFloatAsState(
+        targetValue = if (isPlaying) 1f else 0.30f,
+        animationSpec = tween(400),
+        label = "hero_wave_amp"
+    )
+
+    Canvas(modifier = modifier) {
+        val bars = 46
+        val step = size.width / bars
+        val cy = size.height / 2f
+        val maxHalf = size.height / 2f
+        val strokeW = 2.2.dp.toPx()
+        val t = time
+        val amp = amplitude
+
+        for (i in 0 until bars) {
+            val n = i / (bars - 1f)
+            val envelope = exp(-((n - 0.40f) * (n - 0.40f)) / 0.05f)
+            val irregular = 0.45f + 0.55f * (((i * 37) % 11) / 10f)
+            val motion = 0.35f + 0.65f * (0.5f + 0.5f * sin(t * 5.2f + i * 0.72f))
+            val half = maxHalf * (0.05f + envelope * irregular * motion * amp).coerceIn(0.05f, 1f)
+            val x = step * (i + 0.5f)
+            val color = lerp(BrandPurple, BrandPink, n)
+                .copy(alpha = (0.30f + 0.70f * envelope).coerceIn(0f, 1f))
+            drawLine(
+                color = color,
+                start = Offset(x, cy - half),
+                end = Offset(x, cy + half),
+                strokeWidth = strokeW,
+                cap = StrokeCap.Round
+            )
+        }
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+// Artwork + bottom edge
+// -------------------------------------------------------------------------------------------------
+
+/** Sharp artwork whose edges fade out, so it merges into the blurred backdrop with no boundary. */
+@Composable
+private fun FeatheredArtwork(url: String, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    AsyncImage(
+        model = ImageRequest.Builder(context)
+            .data(url)
+            .crossfade(true)
+            .size(768, 768)
+            .build(),
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = modifier
+            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+            .drawWithContent {
+                drawContent()
+                // Left + right feather
+                drawRect(
+                    brush = Brush.horizontalGradient(
+                        0f to Color.Transparent,
+                        0.30f to Color.Black,
+                        0.80f to Color.Black,
+                        1f to Color.Transparent
+                    ),
+                    blendMode = BlendMode.DstIn
+                )
+                // Top + bottom feather (also hides any text printed on the cover's lower half)
+                drawRect(
+                    brush = Brush.verticalGradient(
+                        0f to Color.Transparent,
+                        0.10f to Color.Black,
+                        0.42f to Color.Black,
+                        0.64f to Color.Transparent
+                    ),
+                    blendMode = BlendMode.DstIn
+                )
+            }
+    )
+}
+
+@Composable
+private fun BottomArc(height: Dp, background: Color, modifier: Modifier = Modifier) {
+    Canvas(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(height)
+    ) {
+        val w = size.width
+        val h = size.height
+
+        fun curve(): Path = Path().apply {
+            moveTo(0f, h * 0.38f)
+            cubicTo(w * 0.30f, h * 1.05f, w * 0.64f, h * 0.90f, w, h * 0.10f)
+        }
+
+        val filled = curve().apply {
+            lineTo(w, h)
+            lineTo(0f, h)
+            close()
+        }
+        drawPath(filled, color = background)
+
+        val rimBrush = Brush.horizontalGradient(
+            0f to Color.Transparent,
+            0.30f to BrandPurple.copy(alpha = 0.85f),
+            0.65f to BrandMagenta.copy(alpha = 0.90f),
+            1f to Color.Transparent
+        )
+        drawPath(curve(), brush = rimBrush, alpha = 0.25f, style = Stroke(width = 7.dp.toPx(), cap = StrokeCap.Round))
+        drawPath(curve(), brush = rimBrush, style = Stroke(width = 1.5.dp.toPx(), cap = StrokeCap.Round))
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+// Sharing (app share is unchanged)
+// -------------------------------------------------------------------------------------------------
+private fun shareSong(context: Context, song: Song, artists: List<String>) {
+    val by = artists.joinToString(", ").ifBlank { song.artist }
+    val message = "🎵 ${song.title}" +
+        (if (by.isNotBlank()) " — $by" else "") +
+        "\n\nListening on VYBE — ad-free music made for your vibe.\nhttps://t.me/VyomaOfficial"
+
+    val sendIntent = Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, message)
+        type = "text/plain"
+    }
+    context.startActivity(Intent.createChooser(sendIntent, "Share song via"))
 }
 
 private fun shareVybeApp(context: Context) {
