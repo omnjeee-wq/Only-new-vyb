@@ -36,10 +36,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.PlaylistAdd
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -158,7 +161,7 @@ fun HeroBanner(
         val bannerHeight = if (sideBySide) {
             (w * 0.72f).coerceIn(430.dp, 520.dp)
         } else {
-            (w * 1.30f).coerceIn(470.dp, 560.dp)
+            (w * 0.86f).coerceIn(340.dp, 420.dp)
         }
         val hPad = when {
             isCompactNarrow -> 14.dp
@@ -166,7 +169,7 @@ fun HeroBanner(
             sideBySide -> 32.dp
             else -> 22.dp
         }
-        val arcHeight = if (sideBySide) 52.dp else 44.dp
+        val arcHeight = if (sideBySide) 52.dp else 64.dp
         val orbSize = if (isCompactNarrow) 48.dp else 56.dp
         val textMaxWidth = if (sideBySide) w * 0.56f else w - hPad * 2
         val separatorHeight = if (isCompactNarrow) 24.dp else if (isCompact) 32.dp else 44.dp
@@ -205,13 +208,14 @@ fun HeroBanner(
                                         .offset(x = side * 0.10f, y = -(side * 0.05f))
                                 )
                             } else {
-                                val side = w * 1.15f
+                                val side = w * 1.05f
                                 FeatheredArtwork(
                                     url = url,
+                                    wideView = true,
                                     modifier = Modifier
                                         .align(Alignment.TopCenter)
                                         .requiredSize(side)
-                                        .offset(y = -(side * 0.04f))
+                                        .offset(y = -(side * 0.09f))
                                 )
                             }
                         }
@@ -234,7 +238,7 @@ fun HeroBanner(
                             start = hPad,
                             end = hPad,
                             top = if (isCompact) 8.dp else 10.dp,
-                            bottom = arcHeight * 0.8f
+                            bottom = if (sideBySide) arcHeight * 0.8f else 14.dp
                         ),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -249,50 +253,82 @@ fun HeroBanner(
                             .weight(1f)
                             .fillMaxWidth()
                     ) {
-                        val titleBudget = (maxHeight - 224.dp).coerceAtLeast(64.dp)
+                        val titleBudget = (maxHeight - (if (sideBySide) 224.dp else 150.dp)).coerceAtLeast(60.dp)
                         val waveWidth = if (sideBySide) textMaxWidth else w - hPad * 2 - orbSize - 12.dp
 
+                        if (!sideBySide) {
+                            PhoneInfoColumn(
+                                modifier = Modifier
+                                    .align(Alignment.BottomStart)
+                                    .widthIn(max = textMaxWidth),
+                                mainTitle = titleParts.main.ifBlank { "Discover your vibe" },
+                                infoLine = infoLine,
+                                artists = artistInfo.first,
+                                extraArtists = artistInfo.second,
+                                isPlaying = isPlaying,
+                                liked = liked,
+                                titleMaxSize = if (isCompactNarrow) 42.sp else 50.sp,
+                                titleMinSize = 26.sp,
+                                titleMaxHeight = titleBudget,
+                                compactNarrow = isCompactNarrow,
+                                onPlayPause = onPlayPauseClick,
+                                onLike = {
+                                    heroSong?.let {
+                                        liked = !liked
+                                        onFavoriteClick(it)
+                                    }
+                                },
+                                onQueue = {
+                                    heroSong?.let {
+                                        onAddToQueueClick(it)
+                                        Toast.makeText(context, "Added to queue", Toast.LENGTH_SHORT).show()
+                                    }
+                                },
+                                onShare = { heroSong?.let { shareSong(context, it, artistInfo.first) } }
+                            )
+                        } else {
                         HeroInfoColumn(
-                            modifier = Modifier
-                                .align(Alignment.BottomStart)
-                                .widthIn(max = textMaxWidth),
-                            mainTitle = titleParts.main.ifBlank { "Discover your vibe" },
-                            infoLine = infoLine,
-                            artists = artistInfo.first,
-                            extraArtists = artistInfo.second,
-                            isPlaying = isPlaying,
-                            liked = liked,
-                            titleMaxSize = when {
-                                isCompactNarrow -> 40.sp
-                                isCompact -> 48.sp
-                                sideBySide && w >= 700.dp -> 64.sp
-                                sideBySide -> 54.sp
-                                else -> 52.sp
-                            },
-                            titleMinSize = 26.sp,
-                            titleMaxHeight = titleBudget,
-                            waveWidth = waveWidth,
-                            compactNarrow = isCompactNarrow,
-                            onPlayPause = onPlayPauseClick,
-                            onLike = {
-                                heroSong?.let {
-                                    liked = !liked
-                                    onFavoriteClick(it)
-                                }
-                            },
-                            onQueue = {
-                                heroSong?.let {
-                                    onAddToQueueClick(it)
-                                    Toast.makeText(context, "Added to queue", Toast.LENGTH_SHORT).show()
-                                }
-                            },
-                            onShare = { heroSong?.let { shareSong(context, it, artistInfo.first) } }
-                        )
+                                modifier = Modifier
+                                    .align(Alignment.BottomStart)
+                                    .widthIn(max = textMaxWidth),
+                                mainTitle = titleParts.main.ifBlank { "Discover your vibe" },
+                                infoLine = infoLine,
+                                artists = artistInfo.first,
+                                extraArtists = artistInfo.second,
+                                isPlaying = isPlaying,
+                                liked = liked,
+                                titleMaxSize = when {
+                                    isCompactNarrow -> 40.sp
+                                    isCompact -> 48.sp
+                                    sideBySide && w >= 700.dp -> 64.sp
+                                    sideBySide -> 54.sp
+                                    else -> 52.sp
+                                },
+                                titleMinSize = 26.sp,
+                                titleMaxHeight = titleBudget,
+                                waveWidth = waveWidth,
+                                compactNarrow = isCompactNarrow,
+                                onPlayPause = onPlayPauseClick,
+                                onLike = {
+                                    heroSong?.let {
+                                        liked = !liked
+                                        onFavoriteClick(it)
+                                    }
+                                },
+                                onQueue = {
+                                    heroSong?.let {
+                                        onAddToQueueClick(it)
+                                        Toast.makeText(context, "Added to queue", Toast.LENGTH_SHORT).show()
+                                    }
+                                },
+                                onShare = { heroSong?.let { shareSong(context, it, artistInfo.first) } }
+                            )
+                        }
                     }
                 }
 
                 // Round play / pause orb (bottom end)
-                PlayOrb(
+                if (sideBySide) PlayOrb(
                     isPlaying = isPlaying,
                     size = orbSize,
                     onClick = onPlayPauseClick,
@@ -544,6 +580,184 @@ private fun HeroInfoColumn(
     }
 }
 
+/** Phone layout: badge, title, artists, info line, then one row of actions. */
+@Composable
+private fun PhoneInfoColumn(
+    modifier: Modifier,
+    mainTitle: String,
+    infoLine: String,
+    artists: List<String>,
+    extraArtists: Int,
+    isPlaying: Boolean,
+    liked: Boolean,
+    titleMaxSize: TextUnit,
+    titleMinSize: TextUnit,
+    titleMaxHeight: Dp,
+    compactNarrow: Boolean,
+    onPlayPause: () -> Unit,
+    onLike: () -> Unit,
+    onQueue: () -> Unit,
+    onShare: () -> Unit
+) {
+    val iconButtonSize = if (compactNarrow) 36.dp else 40.dp
+    var menuOpen by remember { mutableStateOf(false) }
+
+    Column(modifier = modifier, horizontalAlignment = Alignment.Start) {
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(50))
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(BrandPurple.copy(alpha = 0.60f), BrandMagenta.copy(alpha = 0.34f))
+                    )
+                )
+                .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(50))
+                .padding(horizontal = 12.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.AutoAwesome,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(14.dp)
+            )
+            Text(
+                text = "Just Vibe",
+                color = Color.White,
+                fontSize = 12.sp,
+                fontFamily = OutfitFontFamily,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        Spacer(Modifier.height(4.dp))
+
+        FitScriptTitle(
+            text = mainTitle,
+            maxFontSize = titleMaxSize,
+            minFontSize = titleMinSize,
+            maxHeight = titleMaxHeight
+        )
+
+        if (artists.isNotEmpty()) {
+            val annotated = buildAnnotatedString {
+                artists.forEachIndexed { index, name ->
+                    if (index > 0) {
+                        withStyle(SpanStyle(color = BrandMagenta)) { append("  •  ") }
+                    }
+                    append(name.uppercase())
+                }
+                if (extraArtists > 0) {
+                    withStyle(SpanStyle(color = BrandMagenta)) { append("  +$extraArtists") }
+                }
+            }
+            Text(
+                text = annotated,
+                color = Color.White.copy(alpha = 0.94f),
+                fontSize = if (compactNarrow) 11.sp else 12.5.sp,
+                fontFamily = OutfitFontFamily,
+                fontWeight = FontWeight.Medium,
+                letterSpacing = 1.3.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        if (infoLine.isNotBlank()) {
+            Spacer(Modifier.height(3.dp))
+            Text(
+                text = infoLine,
+                color = Color.White.copy(alpha = 0.62f),
+                fontSize = if (compactNarrow) 12.sp else 13.sp,
+                fontFamily = OutfitFontFamily,
+                fontWeight = FontWeight.Normal,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(if (compactNarrow) 8.dp else 10.dp)
+        ) {
+            PlayNowButton(isPlaying = isPlaying, compactNarrow = compactNarrow, onClick = onPlayPause)
+
+            RoundActionButton(
+                size = iconButtonSize,
+                onClick = onLike,
+                contentDescription = if (liked) "Remove from favourites" else "Add to favourites"
+            ) {
+                Icon(
+                    imageVector = if (liked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                    contentDescription = null,
+                    tint = if (liked) BrandPink else Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            RoundActionButton(
+                size = iconButtonSize,
+                onClick = onQueue,
+                contentDescription = "Add to queue"
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.PlaylistAdd,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(21.dp)
+                )
+            }
+            RoundActionButton(
+                size = iconButtonSize,
+                onClick = onShare,
+                contentDescription = "Share song"
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Share,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(19.dp)
+                )
+            }
+            Box {
+                RoundActionButton(
+                    size = iconButtonSize,
+                    onClick = { menuOpen = true },
+                    contentDescription = "More options"
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.MoreVert,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                DropdownMenu(
+                    expanded = menuOpen,
+                    onDismissRequest = { menuOpen = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Add to queue") },
+                        onClick = {
+                            menuOpen = false
+                            onQueue()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Share song") },
+                        onClick = {
+                            menuOpen = false
+                            onShare()
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
 /**
  * Script title that shrinks until it fits in [maxHeight] with at most two lines,
  * then falls back to an ellipsis at [minFontSize].
@@ -787,7 +1001,7 @@ private fun HeroWaveform(isPlaying: Boolean, modifier: Modifier = Modifier) {
 
 /** Sharp artwork whose edges fade out, so it merges into the blurred backdrop with no boundary. */
 @Composable
-private fun FeatheredArtwork(url: String, modifier: Modifier = Modifier) {
+private fun FeatheredArtwork(url: String, modifier: Modifier = Modifier, wideView: Boolean = false) {
     val context = LocalContext.current
     AsyncImage(
         model = ImageRequest.Builder(context)
@@ -803,22 +1017,40 @@ private fun FeatheredArtwork(url: String, modifier: Modifier = Modifier) {
                 drawContent()
                 // Left + right feather
                 drawRect(
-                    brush = Brush.horizontalGradient(
-                        0f to Color.Transparent,
-                        0.30f to Color.Black,
-                        0.80f to Color.Black,
-                        1f to Color.Transparent
-                    ),
+                    brush = if (wideView) {
+                        Brush.horizontalGradient(
+                            0f to Color.Transparent,
+                            0.07f to Color.Black,
+                            0.93f to Color.Black,
+                            1f to Color.Transparent
+                        )
+                    } else {
+                        Brush.horizontalGradient(
+                            0f to Color.Transparent,
+                            0.30f to Color.Black,
+                            0.80f to Color.Black,
+                            1f to Color.Transparent
+                        )
+                    },
                     blendMode = BlendMode.DstIn
                 )
                 // Top + bottom feather (also hides any text printed on the cover's lower half)
                 drawRect(
-                    brush = Brush.verticalGradient(
-                        0f to Color.Transparent,
-                        0.10f to Color.Black,
-                        0.42f to Color.Black,
-                        0.64f to Color.Transparent
-                    ),
+                    brush = if (wideView) {
+                        Brush.verticalGradient(
+                            0f to Color.Transparent,
+                            0.14f to Color.Black,
+                            0.48f to Color.Black,
+                            0.68f to Color.Transparent
+                        )
+                    } else {
+                        Brush.verticalGradient(
+                            0f to Color.Transparent,
+                            0.10f to Color.Black,
+                            0.42f to Color.Black,
+                            0.64f to Color.Transparent
+                        )
+                    },
                     blendMode = BlendMode.DstIn
                 )
             }
