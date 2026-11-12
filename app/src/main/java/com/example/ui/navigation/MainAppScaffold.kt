@@ -1,5 +1,16 @@
 package com.example.ui.navigation
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import com.example.player.VybePlaybackService
+import com.example.player.visualizer.AudioVisualizerController
+import com.example.ui.visualizer.VybeVisualizerStyle
+
 import androidx.compose.material3.MaterialTheme
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
@@ -19,7 +30,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,6 +78,43 @@ fun MainAppScaffold(
     val showOfflineScreen = !isOnline && !isViewingDownloadsOffline
 
     val playerState by playerManager.playerState.collectAsStateWithLifecycle()
+    val visualizerController = remember { AudioVisualizerController() }
+    val audioSpectrum by visualizerController.spectrum.collectAsStateWithLifecycle()
+    val visualizerPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            val sessionId = VybePlaybackService.instance?.exoPlayer?.audioSessionId ?: 0
+            visualizerController.start(sessionId)
+        }
+    }
+
+    // Attach only to VYBE's active ExoPlayer session. No microphone capture or audio storage.
+    LaunchedEffect(playerState.isPlaying) {
+        if (!playerState.isPlaying) {
+            visualizerController.stop()
+        } else {
+            val hasPermission = ContextCompat.checkSelfPermission(
+                context, Manifest.permission.RECORD_AUDIO
+            ) == PackageManager.PERMISSION_GRANTED
+            if (hasPermission) {
+                repeat(10) {
+                    if (!playerState.isPlaying) return@LaunchedEffect
+                    val sessionId = VybePlaybackService.instance?.exoPlayer?.audioSessionId ?: 0
+                    if (sessionId > 0) {
+                        visualizerController.start(sessionId)
+                        return@LaunchedEffect
+                    }
+                    kotlinx.coroutines.delay(300)
+                }
+            } else {
+                visualizerPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+            }
+        }
+    }
+    DisposableEffect(visualizerController) {
+        onDispose { visualizerController.release() }
+    }
 
     LaunchedEffect(initialOpenPlayer) {
         if (initialOpenPlayer) {
@@ -171,7 +218,8 @@ fun MainAppScaffold(
                 },
                 onOpenFullPlayer = { isPlayerExpanded = true },
                 onPlayPause = { playerManager.togglePlayPause() },
-                onNext = { playerManager.next() }
+                onNext = { playerManager.next() },
+                audioSpectrum = audioSpectrum
             )
         }
 

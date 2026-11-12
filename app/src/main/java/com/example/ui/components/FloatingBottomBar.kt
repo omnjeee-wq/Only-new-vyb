@@ -66,6 +66,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.player.PlayerState
+import com.example.ui.visualizer.ParticleBlob
 import com.example.ui.components.glass.GlassMiniPlayerContainer
 import com.example.ui.components.glass.GlassNavigationContainer
 import com.example.ui.theme.OutfitFontFamily
@@ -88,6 +89,7 @@ fun FloatingBottomBar(
     onOpenFullPlayer: () -> Unit,
     onPlayPause: () -> Unit,
     onNext: () -> Unit,
+    audioSpectrum: FloatArray = FloatArray(64),
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -278,9 +280,9 @@ fun FloatingBottomBar(
                         .testTag("center_player_button"),
                     contentAlignment = Alignment.Center
                 ) {
-                    EqualizerWaveformIndicator(
-                        modifier = Modifier.size(22.dp),
-                        isPlaying = playerState.isPlaying,
+                    ParticleBlob(
+                        spectrum = audioSpectrum,
+                        modifier = Modifier.size(34.dp),
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
