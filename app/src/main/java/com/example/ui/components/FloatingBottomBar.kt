@@ -66,13 +66,12 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.player.PlayerState
-import com.example.ui.visualizer.ParticleBlob
+import com.example.ui.visualizer.PremiumNavVisualizer
 import com.example.ui.components.glass.GlassMiniPlayerContainer
 import com.example.ui.components.glass.GlassNavigationContainer
 import com.example.ui.theme.OutfitFontFamily
 import com.example.ui.theme.animation.MotionSpecs
 import com.example.ui.theme.animation.pressScale
-import com.example.ui.theme.pulsingGlow
 
 enum class NavDestination {
     HOME,
@@ -233,13 +232,15 @@ fun FloatingBottomBar(
             }
         }
 
-        // Floating Glass Navigation Bar
-        GlassNavigationContainer {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+        // Floating Glass Navigation Bar. The center visualizer is overlaid outside
+        // the clipped glass surface so its luminous organic rings can protrude like the reference.
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            GlassNavigationContainer {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                 // Home
                 NavIconItem(
                     selected = currentDestination == NavDestination.HOME,
@@ -258,34 +259,9 @@ fun FloatingBottomBar(
                     onClick = { onNavigate(NavDestination.SEARCH) }
                 )
 
-                // CENTER EQUALIZER BUTTON with refined spring feedback
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .pulsingGlow(
-                            color = MaterialTheme.colorScheme.primary,
-                            minRadius = 4.dp,
-                            maxRadius = 14.dp,
-                            minAlpha = 0.25f,
-                            maxAlpha = 0.65f
-                        )
-                        .clip(CircleShape)
-                        .background(
-                            Brush.linearGradient(
-                                listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary)
-                            )
-                        )
-                        .border(1.dp, Color.White.copy(alpha = 0.45f), CircleShape)
-                        .pressScale(pressedScale = 0.90f) { onOpenFullPlayer() }
-                        .testTag("center_player_button"),
-                    contentAlignment = Alignment.Center
-                ) {
-                    ParticleBlob(
-                        spectrum = audioSpectrum,
-                        modifier = Modifier.size(34.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
+                // Reserve a centered slot; the premium visualizer is drawn as an
+                // unclipped overlay below so the glowing contour can extend beyond the bar.
+                Spacer(modifier = Modifier.width(84.dp))
 
                 // Library
                 NavIconItem(
@@ -303,6 +279,22 @@ fun FloatingBottomBar(
                     unselectedIcon = Icons.Outlined.Settings,
                     label = "Settings",
                     onClick = { onNavigate(NavDestination.SETTINGS) }
+                )
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(116.dp)
+                    .pressScale(pressedScale = 0.94f) { onOpenFullPlayer() }
+                    .testTag("center_player_button"),
+                contentAlignment = Alignment.Center
+            ) {
+                PremiumNavVisualizer(
+                    spectrum = audioSpectrum,
+                    isPlaying = playerState.isPlaying,
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }
