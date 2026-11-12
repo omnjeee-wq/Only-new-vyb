@@ -372,7 +372,10 @@ private fun HeroTopBar(
     isCompactNarrow: Boolean,
     isCompact: Boolean
 ) {
-    val vybeTitleFontSize = if (isCompactNarrow) 22.sp else if (isCompact) 25.sp else 28.sp
+    // Slightly larger brand lockup to match the approved VYBE header reference.
+    val vybeTitleFontSize = if (isCompactNarrow) 26.sp else if (isCompact) 29.sp else 32.sp
+    val logoSize = if (isCompactNarrow) 50.dp else if (isCompact) 56.dp else 62.dp
+    val logoTextGap = if (isCompactNarrow) 10.dp else 12.dp
     val shareButtonSize = if (isCompactNarrow) 34.dp else 38.dp
     val shareIconSize = if (isCompactNarrow) 16.dp else 19.dp
 
@@ -385,26 +388,22 @@ private fun HeroTopBar(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(if (isCompactNarrow) 8.dp else 10.dp)
+            horizontalArrangement = Arrangement.spacedBy(logoTextGap)
         ) {
             Image(
                 painter = painterResource(id = R.drawable.vybe_logo),
                 contentDescription = "VYBE logo",
                 contentScale = ContentScale.Fit,
-                modifier = Modifier.size(
-                    if (isCompactNarrow) 44.dp
-                    else if (isCompact) 50.dp
-                    else 56.dp
-                )
+                modifier = Modifier.size(logoSize)
             )
 
             Text(
                 text = "VYBE",
                 color = Color.White,
                 fontSize = vybeTitleFontSize,
-                fontWeight = FontWeight.Black,
-                fontFamily = FontFamily.SansSerif,
-                letterSpacing = (-0.6).sp
+                fontWeight = FontWeight.ExtraBold,
+                fontFamily = OutfitFontFamily,
+                letterSpacing = (-0.8).sp
             )
         }
 
