@@ -287,7 +287,7 @@ fun FloatingBottomBar(
             Box(
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .size(116.dp)
+                    .size(88.dp)
                     .pressScale(pressedScale = 0.94f) { onOpenFullPlayer() }
                     .testTag("center_player_button"),
                 contentAlignment = Alignment.Center

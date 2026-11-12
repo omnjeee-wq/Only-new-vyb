@@ -46,23 +46,37 @@ fun GlassNavigationContainer(
         1.0f to Color.Black.copy(alpha = 0.14f)
     )
 
+    // The glass surface remains 66dp tall, while the outer layout reserves a
+    // little extra vertical room so the center spectrum orb can breathe beyond
+    // the bar without being clipped by the rounded glass surface.
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(66.dp)
-            .shadow(
-                elevation = 16.dp,
-                shape = shape,
-                spotColor = Color.Black.copy(alpha = 0.40f),
-                ambientColor = Color.Black.copy(alpha = 0.25f)
-            )
-            .clip(shape)
-            .background(surfaceColor)
-            .background(internalSheen)
-            .border(1.dp, borderBrush, shape)
-            .padding(horizontal = 8.dp),
+            .height(76.dp),
         contentAlignment = Alignment.Center
     ) {
-        content()
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(66.dp)
+                .shadow(
+                    elevation = 16.dp,
+                    shape = shape,
+                    spotColor = Color.Black.copy(alpha = 0.40f),
+                    ambientColor = Color.Black.copy(alpha = 0.25f)
+                )
+                .clip(shape)
+                .background(surfaceColor)
+                .background(internalSheen)
+                .border(1.dp, borderBrush, shape)
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            contentAlignment = Alignment.Center,
+            content = content
+        )
     }
 }

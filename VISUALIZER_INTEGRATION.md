@@ -8,7 +8,9 @@
   - `SPECTRUM_BARS` — C, frequency bars
   - `PARTICLE_BLOB` — D, audio-reactive particle/blob
 - Added `VybeVisualizerRegistry` as the central style registry. `defaultStyle` is `PARTICLE_BLOB`.
-- Replaced the center navigation button with `PremiumNavVisualizer`: a protruding Apple-inspired glass orb with three luminous organic FFT-reactive contours and seven live spectrum pillars. The orb is drawn outside the clipped glass navigation surface to match the supplied reference.
+- Replaced the center navigation button with a compact `PremiumNavVisualizer`: three thin, flowing FFT-reactive contours, a dark glass core, and seven short spectrum pillars. The orb extends slightly beyond the 66dp glass surface without clipping.
+- Added 60fps UI-side attack/release interpolation so lower-rate FFT callbacks render as smooth motion rather than stepped/jagged outlines.
+- Updated FFT extraction to logarithmic frequency bands with dB normalization and attack/release smoothing for more useful bass, mid, and treble response.
 - Added the Android `RECORD_AUDIO` permission because Android's `Visualizer` API requires it for a player-specific audio session. The app requests it only when playback starts and the visualizer is about to be used.
 
 ## Use another style later
