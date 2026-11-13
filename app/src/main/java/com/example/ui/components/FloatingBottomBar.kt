@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -89,7 +90,6 @@ fun FloatingBottomBar(
     onOpenFullPlayer: () -> Unit,
     onPlayPause: () -> Unit,
     onNext: () -> Unit,
-    audioSpectrum: FloatArray = FloatArray(64),
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -292,10 +292,10 @@ fun FloatingBottomBar(
                     .testTag("center_player_button"),
                 contentAlignment = Alignment.Center
             ) {
+                // requiredSize lets the glowing membrane breathe past the 88dp touch box.
                 PremiumNavVisualizer(
-                    spectrum = audioSpectrum,
                     isPlaying = playerState.isPlaying,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.requiredSize(96.dp)
                 )
             }
         }

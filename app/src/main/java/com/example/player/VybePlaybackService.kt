@@ -16,6 +16,8 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.Renderer
+import androidx.media3.exoplayer.audio.AudioSink
+import androidx.media3.exoplayer.audio.DefaultAudioSink
 import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
 import androidx.media3.exoplayer.video.VideoRendererEventListener
 import androidx.media3.session.DefaultMediaNotificationProvider
@@ -23,6 +25,8 @@ import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import com.example.MainActivity
 import com.example.R
+import com.example.player.visualizer.SpectrumAudioProcessor
+import com.example.player.visualizer.SpectrumTapAudioSink
 import java.util.ArrayList
 
 class VybePlaybackService : MediaSessionService() {
@@ -57,6 +61,19 @@ class VybePlaybackService : MediaSessionService() {
         // unsupported hardware video decoders and triggering
         // "Failed to query component interface for required system resources: 6"
         val renderersFactory = object : DefaultRenderersFactory(this) {
+            // Visualizer tap: reads the real PCM that is being played (no mic, no
+            // RECORD_AUDIO permission) and exposes it to the nav-bar orb.
+            override fun buildAudioSink(
+                context: Context,
+                enableFloatOutput: Boolean,
+                enableAudioTrackPlaybackParams: Boolean
+            ): AudioSink {
+                val sink = DefaultAudioSink.Builder(context)
+                    .setAudioProcessors(arrayOf(SpectrumAudioProcessor()))
+                    .build()
+                return SpectrumTapAudioSink(sink)
+            }
+
             override fun buildVideoRenderers(
                 context: Context,
                 extensionRendererMode: Int,
