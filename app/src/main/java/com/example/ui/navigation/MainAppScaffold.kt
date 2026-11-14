@@ -134,7 +134,8 @@ fun MainAppScaffold(
                     HomeScreen(
                         viewModel = homeViewModel,
                         playerManager = playerManager,
-                        onOpenFullPlayer = { isPlayerExpanded = true }
+                        onOpenFullPlayer = { isPlayerExpanded = true },
+                        onOpenAiHub = { currentDestination = NavDestination.AI }
                     )
                 }
                 NavDestination.SEARCH -> {

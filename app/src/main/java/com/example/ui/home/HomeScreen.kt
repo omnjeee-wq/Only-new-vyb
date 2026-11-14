@@ -45,6 +45,7 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     playerManager: PlayerManager,
     onOpenFullPlayer: () -> Unit,
+    onOpenAiHub: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -144,7 +145,8 @@ fun HomeScreen(
                                 isPlaying = isHeroCurrent && playerState.isPlaying,
                                 onPlayPauseClick = { viewModel.toggleHeroPlayPause() },
                                 onFavoriteClick = { song -> viewModel.toggleFavorite(song) },
-                                onAddToQueueClick = { song -> viewModel.addToQueue(song) }
+                                onAddToQueueClick = { song -> viewModel.addToQueue(song) },
+                                onOpenAiHub = onOpenAiHub
                             )
                         }
 

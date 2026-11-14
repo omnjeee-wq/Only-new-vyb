@@ -11,6 +11,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -133,7 +134,8 @@ fun HeroBanner(
     onPlayPauseClick: () -> Unit,
     modifier: Modifier = Modifier,
     onFavoriteClick: (Song) -> Unit = {},
-    onAddToQueueClick: (Song) -> Unit = {}
+    onAddToQueueClick: (Song) -> Unit = {},
+    onOpenAiHub: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val screenBackground = MaterialTheme.colorScheme.background
@@ -258,7 +260,8 @@ fun HeroBanner(
                     HeroTopBar(
                         context = context,
                         isCompactNarrow = isCompactNarrow,
-                        isCompact = isCompact
+                        isCompact = isCompact,
+                        onOpenAiHub = onOpenAiHub
                     )
 
                     BoxWithConstraints(
@@ -370,7 +373,8 @@ fun HeroBanner(
 private fun HeroTopBar(
     context: Context,
     isCompactNarrow: Boolean,
-    isCompact: Boolean
+    isCompact: Boolean,
+    onOpenAiHub: () -> Unit
 ) {
     val vybeTitleFontSize = if (isCompactNarrow) 22.sp else if (isCompact) 25.sp else 28.sp
     val shareButtonSize = if (isCompactNarrow) 34.dp else 38.dp
@@ -408,24 +412,61 @@ private fun HeroTopBar(
             )
         }
 
-        IconButton(
-            onClick = { shareVybeApp(context) },
-            modifier = Modifier
-                .size(shareButtonSize)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.16f))
-                .border(
-                    1.dp,
-                    Color.White.copy(alpha = 0.22f),
-                    CircleShape
-                )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Icon(
-                imageVector = Icons.Outlined.Share,
-                contentDescription = "Share VYBE",
-                tint = Color.White,
-                modifier = Modifier.size(shareIconSize)
-            )
+            // AI Hub shortcut moved from the bottom navigation into the home header.
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color(0xFF171020).copy(alpha = 0.72f))
+                    .border(
+                        width = 1.2.dp,
+                        brush = Brush.linearGradient(listOf(Color(0xFFB64CFF), Color(0xFF42DFFF))),
+                        shape = RoundedCornerShape(14.dp)
+                    )
+                    .clickable(onClick = onOpenAiHub)
+                    .padding(horizontal = 10.dp, vertical = 6.dp)
+                    .testTag("header_ai_button"),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(3.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.AutoAwesome,
+                    contentDescription = null,
+                    tint = Color(0xFFD66BFF),
+                    modifier = Modifier.size(if (isCompactNarrow) 16.dp else 18.dp)
+                )
+                Text(
+                    text = "AI",
+                    color = Color(0xFF70E5FF),
+                    fontSize = if (isCompactNarrow) 17.sp else 19.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = OutfitFontFamily
+                )
+            }
+
+            IconButton(
+                onClick = { shareVybeApp(context) },
+                modifier = Modifier
+                    .size(shareButtonSize)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.16f))
+                    .border(
+                        1.dp,
+                        Color.White.copy(alpha = 0.22f),
+                        CircleShape
+                    )
+                    .testTag("share_button")
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Share,
+                    contentDescription = "Share VYBE",
+                    tint = Color.White,
+                    modifier = Modifier.size(shareIconSize)
+                )
+            }
         }
     }
 }

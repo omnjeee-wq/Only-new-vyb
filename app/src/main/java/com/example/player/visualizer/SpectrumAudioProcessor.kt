@@ -91,49 +91,31 @@ class SpectrumAudioProcessor : BaseAudioProcessor() {
         out.flip()
     }
 
-    private val shortChunk = ShortArray(CHUNK_SAMPLES)
-    private val floatChunk = FloatArray(CHUNK_SAMPLES)
-
     private fun analyze(buf: ByteBuffer) {
         val bytesPerSample = if (isFloat) 4 else 2
-        var remainingFrames = buf.remaining() / (bytesPerSample * channels)
+        val frames = buf.remaining() / (bytesPerSample * channels)
         val startUs = AudioSpectrumHub.bufferStartUs
         val rate = sampleRate.toLong()
         val inv = 1f / channels
-        val chunkFrames = (CHUNK_SAMPLES / channels).coerceAtLeast(1)
-        val shorts = if (isFloat) null else buf.asShortBuffer()
-        val floats = if (isFloat) buf.asFloatBuffer() else null
-        var frameIndex = 0
 
-        // Bulk-read PCM in chunks (much cheaper than one ByteBuffer call per sample).
-        while (remainingFrames > 0) {
-            val n = min(chunkFrames, remainingFrames)
-            val count = n * channels
-            if (isFloat) floats!!.get(floatChunk, 0, count) else shorts!!.get(shortChunk, 0, count)
-
-            var idx = 0
-            for (f in 0 until n) {
-                var sum = 0f
-                for (c in 0 until channels) {
-                    sum += if (isFloat) floatChunk[idx] else shortChunk[idx] * INV_32768
-                    idx++
-                }
-                ring[writePos] = sum * inv
-                writePos = (writePos + 1) and (N - 1)
-                if (filled < N) filled++
-                frameIndex++
-                sinceHop++
-
-                if (sinceHop >= hop && filled >= N) {
-                    sinceHop = 0
-                    computeFrame()
-                    // Stamp with the moment this window's *centre* is heard.
-                    val endUs = startUs + frameIndex * 1_000_000L / rate
-                    val timeUs = endUs - (N / 2) * 1_000_000L / rate
-                    AudioSpectrumHub.pushFrame(timeUs, bands, lastBass, lastBeat)
-                }
+        for (i in 0 until frames) {
+            var sum = 0f
+            for (c in 0 until channels) {
+                sum += if (isFloat) buf.getFloat() else buf.getShort() / 32768f
             }
-            remainingFrames -= n
+            ring[writePos] = sum * inv
+            writePos = (writePos + 1) and (N - 1)
+            if (filled < N) filled++
+            sinceHop++
+
+            if (sinceHop >= hop && filled >= N) {
+                sinceHop = 0
+                computeFrame()
+                // Stamp with the moment this window's *centre* is heard.
+                val endUs = startUs + (i + 1) * 1_000_000L / rate
+                val timeUs = endUs - (N / 2) * 1_000_000L / rate
+                AudioSpectrumHub.pushFrame(timeUs, bands, lastBass, lastBeat)
+            }
         }
     }
 
@@ -245,9 +227,7 @@ class SpectrumAudioProcessor : BaseAudioProcessor() {
 
     private companion object {
         const val N = 2048 // FFT size (power of two)
-        const val HOPS_PER_SECOND = 50
-        const val CHUNK_SAMPLES = 4096
-        const val INV_32768 = 1f / 32768f
+        const val HOPS_PER_SECOND = 60
         const val BASS_BANDS = 6
         const val RANGE_DB = 46f
         const val MIN_REF_DB = -45f

@@ -34,7 +34,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -42,7 +41,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.LibraryMusic
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
@@ -261,15 +259,6 @@ fun FloatingBottomBar(
                     unselectedIcon = Icons.Outlined.Search,
                     label = "Search",
                     onClick = { onNavigate(NavDestination.SEARCH) }
-                )
-
-                // AI Hub
-                NavIconItem(
-                    selected = currentDestination == NavDestination.AI,
-                    selectedIcon = Icons.Filled.AutoAwesome,
-                    unselectedIcon = Icons.Outlined.AutoAwesome,
-                    label = "AI",
-                    onClick = { onNavigate(NavDestination.AI) }
                 )
 
                 // Reserve a centered slot; the premium visualizer is drawn as an
