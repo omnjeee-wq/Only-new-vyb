@@ -34,6 +34,7 @@ import com.example.ui.components.FloatingBottomBar
 import com.example.ui.components.NavDestination
 import com.example.ui.home.HomeScreen
 import com.example.ui.home.HomeViewModel
+import com.example.ui.ai.AiHubScreen
 import com.example.ui.library.LibraryScreen
 import com.example.ui.library.LibraryViewModel
 import com.example.ui.placeholder.PlaceholderScreen
@@ -139,6 +140,13 @@ fun MainAppScaffold(
                 NavDestination.SEARCH -> {
                     SearchScreen(
                         viewModel = searchViewModel,
+                        playerManager = playerManager
+                    )
+                }
+                NavDestination.AI -> {
+                    AiHubScreen(
+                        repository = VybeApp.instance.repository,
+                        recommendationEngine = VybeApp.instance.recommendationEngine,
                         playerManager = playerManager
                     )
                 }

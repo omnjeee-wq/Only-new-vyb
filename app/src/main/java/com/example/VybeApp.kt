@@ -22,6 +22,9 @@ class VybeApp : Application() {
     lateinit var repository: MusicRepository
         private set
 
+    lateinit var aiApi: com.example.data.ai.VybeAiApi
+        private set
+
     lateinit var recommendationEngine: RecommendationEngine
     lateinit var playlistFeedEngine: PlaylistFeedEngine
         private set
@@ -41,6 +44,7 @@ class VybeApp : Application() {
 
         database = VybeDatabase.getInstance(this)
         repository = MusicRepositoryImpl(RetrofitClient.apiService, database.songDao())
+        aiApi = com.example.data.ai.VybeAiApi.create(BuildConfig.VYBE_AI_BASE_URL.ifBlank { "https://127.0.0.1/" })
         recommendationEngine = RecommendationEngine(repository, database.songDao())
         playlistFeedEngine = PlaylistFeedEngine(repository, database.songDao())
         playerManager = PlayerManager.initialize(this, repository)

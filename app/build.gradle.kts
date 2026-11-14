@@ -19,6 +19,10 @@ android {
     versionCode = 2
     versionName = "1.0.1"
 
+    // Optional self-hosted VYBE AI backend. Set VYBE_AI_BASE_URL in ~/.gradle/gradle.properties.
+    val aiBaseUrl = (project.findProperty("VYBE_AI_BASE_URL") as String?) ?: ""
+    buildConfigField("String", "VYBE_AI_BASE_URL", "\"${aiBaseUrl.replace("\"", "")}\"")
+
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
 

@@ -34,6 +34,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -41,6 +42,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.LibraryMusic
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
@@ -78,6 +80,7 @@ import com.example.ui.theme.animation.pressScale
 enum class NavDestination {
     HOME,
     SEARCH,
+    AI,
     LIBRARY,
     SETTINGS
 }
@@ -260,9 +263,18 @@ fun FloatingBottomBar(
                     onClick = { onNavigate(NavDestination.SEARCH) }
                 )
 
+                // AI Hub
+                NavIconItem(
+                    selected = currentDestination == NavDestination.AI,
+                    selectedIcon = Icons.Filled.AutoAwesome,
+                    unselectedIcon = Icons.Outlined.AutoAwesome,
+                    label = "AI",
+                    onClick = { onNavigate(NavDestination.AI) }
+                )
+
                 // Reserve a centered slot; the premium visualizer is drawn as an
                 // unclipped overlay below so the glowing contour can extend beyond the bar.
-                Spacer(modifier = Modifier.width(84.dp))
+                Spacer(modifier = Modifier.width(52.dp))
 
                 // Library
                 NavIconItem(
@@ -333,7 +345,7 @@ private fun NavIconItem(
             .clip(RoundedCornerShape(16.dp))
             .background(pillBackground)
             .pressScale(pressedScale = 0.92f) { onClick() }
-            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .padding(horizontal = 5.dp, vertical = 6.dp)
             .testTag("nav_item_${label.lowercase()}"),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
