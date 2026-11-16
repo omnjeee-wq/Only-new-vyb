@@ -17,8 +17,12 @@ import androidx.media3.common.C
 object AudioSpectrumHub {
     const val BANDS = 32
 
+    /** Debug switch: false = normal ExoPlayer audio path, orb only idles. Use to A/B test lag. */
+    const val AUDIO_TAP_ENABLED = true
+
     private const val RING = 256
     private const val STALE_US = 250_000L
+    private const val SAFETY_SLOTS = 8
     private const val MAX_EXTRAPOLATION_US = 120_000L
 
     /** One snapshot of the music: 0..1 values. */
@@ -28,13 +32,20 @@ object AudioSpectrumHub {
         var beat = 0f
     }
 
-    private val lock = Any()
+    // Lock-free single-writer ring (writer = audio thread, reader = UI thread).
+    // The audio thread must NEVER block on a lock the UI thread might hold: under CPU
+    // load the UI thread can be descheduled while holding it, which would starve the
+    // audio buffer and make the music stutter.
     private val times = LongArray(RING)
     private val bandData = Array(RING) { FloatArray(BANDS) }
     private val bassData = FloatArray(RING)
     private val beatData = FloatArray(RING)
-    private var head = 0 // next write slot
-    private var count = 0
+
+    @Volatile
+    private var writeIndex = 0L // total frames ever written (publishes slots to the reader)
+
+    @Volatile
+    private var validFrom = 0L // frames before this index belong to an old timeline
 
     /** Media time (us) of the first sample of the buffer currently entering the sink. */
     @Volatile
@@ -47,22 +58,18 @@ object AudioSpectrumHub {
     private var sinkPositionNanos: Long = 0L
 
     internal fun pushFrame(timeUs: Long, bands: FloatArray, bass: Float, beat: Float) {
-        synchronized(lock) {
-            System.arraycopy(bands, 0, bandData[head], 0, BANDS)
-            times[head] = timeUs
-            bassData[head] = bass
-            beatData[head] = beat
-            head = (head + 1) % RING
-            if (count < RING) count++
-        }
+        val index = writeIndex
+        val slot = (index % RING).toInt()
+        System.arraycopy(bands, 0, bandData[slot], 0, BANDS)
+        times[slot] = timeUs
+        bassData[slot] = bass
+        beatData[slot] = beat
+        writeIndex = index + 1 // volatile write publishes the slot
     }
 
     /** Called on seek / track change / release: old frames belong to a different timeline. */
     internal fun clear() {
-        synchronized(lock) {
-            count = 0
-            head = 0
-        }
+        validFrom = writeIndex
     }
 
     internal fun reportSinkPosition(positionUs: Long) {
@@ -80,20 +87,21 @@ object AudioSpectrumHub {
         val sinceReportUs = (System.nanoTime() - sinkPositionNanos) / 1000L
         val nowUs = position + sinceReportUs.coerceIn(0L, MAX_EXTRAPOLATION_US)
 
-        synchronized(lock) {
-            var found = -1
-            for (k in 0 until count) {
-                val i = (head - 1 - k + RING * 2) % RING
-                if (times[i] <= nowUs) {
-                    found = i
-                    break
-                }
+        val end = writeIndex // volatile read: everything below `end` is fully written
+        val oldest = maxOf(validFrom, end - RING + SAFETY_SLOTS)
+        var i = end - 1
+        while (i >= oldest) {
+            val slot = (i % RING).toInt()
+            if (times[slot] <= nowUs) {
+                if (nowUs - times[slot] > STALE_US) return false
+                System.arraycopy(bandData[slot], 0, out.bands, 0, BANDS)
+                out.bass = bassData[slot]
+                out.beat = beatData[slot]
+                // Make sure the writer did not lap this slot while we were copying.
+                return writeIndex - i < RING - 2
             }
-            if (found < 0 || nowUs - times[found] > STALE_US) return false
-            System.arraycopy(bandData[found], 0, out.bands, 0, BANDS)
-            out.bass = bassData[found]
-            out.beat = beatData[found]
+            i--
         }
-        return true
+        return false
     }
 }
